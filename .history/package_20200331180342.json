@@ -1,0 +1,20 @@
+{
+  "name": "daodaoexcel",
+  "version": "1.0.0",
+  "description": "a web excel plugin",
+  "main": "src/main.js",
+  "scripts": {
+    "dev":"webpack-dev-server",
+    "build":"webpack --config webpack.config.js --grogress --colors",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
