@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "uuid": "^7.0.2"
+    "uuid": "^7.0.2",
+    "zrender": "^4.3.0"
   },
   "devDependencies": {
     "webpack": "^4.42.1",
