@@ -4,6 +4,7 @@ import SelectCell from './selectCell.js'
 import TableHeaderCell from './tableHeaderCell.js'
 import TableIndexCell from './tableIndexCell.js'
 import {defaultTableConfig,headerHeight,indexWidth} from './config'
+import Scroll from './scroll.js'
 
 class DaoDaoExcel {
     constructor(obj){
@@ -30,6 +31,7 @@ class DaoDaoExcel {
         this.tebleIndex = null
         //列头1-n的单元格
         this.tableIndexCell = []
+        //左上角的那个什么也没有的格子
         this.selectAllCell = null
         this.init()
     }
@@ -62,6 +64,8 @@ class DaoDaoExcel {
                 height:headerHeight * 2
             }
         })
+        //初始化滚动条
+        this.initScroll()
         this.canvas.add(this.selectAllCell)
        //绑定事件
        this.initEvents()
@@ -78,6 +82,7 @@ class DaoDaoExcel {
             cell.unSelectCell()
         })
     }
+    //更新选择状态
     updateSelectState(){
         this.selectCells.forEach(cell => {
             cell.selectCell()
@@ -105,7 +110,6 @@ class DaoDaoExcel {
                 this.table.add(this.cells[x][y])
             }
         }
-        console.log(this.cells)
         this.table.on('mousedown',(event) => {
             this.cancelSelectCell()
             //设置选中单元格为当前单击的单元格
@@ -462,6 +466,25 @@ class DaoDaoExcel {
                 this.tableIndexCell[i].selectCell()
             }
         }
+    }
+    //初始化滚动条
+    initScroll(){
+        //计算纵向的高度
+        const tableHeight = this.currentObj.row * this.currentObj.cellHeight
+        //计算纵向显示高度
+        const tableWrapperHeight = this.canvas.getHeight() - headerHeight
+        //计算横向的宽度
+        const tableWidth = this.currentObj.span * this.currentObj.cellWidth
+        //计算横向显示宽度
+        const tableWrapperWidth = this.canvas.getWidth() - indexWidth
+        
+        this.scroll = new Scroll({
+            fullHeight:tableHeight,
+            wrapHeight:tableWrapperHeight,
+            fullWidth:tableWidth,
+            wrapWidth:tableWrapperWidth,
+            wrapperId:this.currentObj.id
+        })
     }
 }
 

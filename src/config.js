@@ -3,8 +3,8 @@ export const letter = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','
 export const defaultTableConfig = {
     cellWidth:100,
     cellHeight:30,
-    row:10,
-    span:8
+    row:30,
+    span:26
 }
 
 //表头高度
