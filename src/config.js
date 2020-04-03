@@ -11,3 +11,5 @@ export const defaultTableConfig = {
 export const headerHeight = 20
 //列头宽度
 export const indexWidth = 50
+//scrollWidth
+export const scrollWidth = 10

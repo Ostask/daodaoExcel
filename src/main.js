@@ -3,8 +3,9 @@ import Cell from './cell.js'
 import SelectCell from './selectCell.js'
 import TableHeaderCell from './tableHeaderCell.js'
 import TableIndexCell from './tableIndexCell.js'
-import {defaultTableConfig,headerHeight,indexWidth} from './config'
+import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
 import Scroll from './scroll.js'
+import { mouseWheelDirection } from "./utils.js"
 
 class DaoDaoExcel {
     constructor(obj){
@@ -28,7 +29,7 @@ class DaoDaoExcel {
         //表头a-z单元格
         this.tableHeaderCell = []
         //列头1-n
-        this.tebleIndex = null
+        this.tableIndex = null
         //列头1-n的单元格
         this.tableIndexCell = []
         //左上角的那个什么也没有的格子
@@ -62,7 +63,8 @@ class DaoDaoExcel {
                 y:1,
                 width:indexWidth * 2,
                 height:headerHeight * 2
-            }
+            },
+            zlevel:1001
         })
         //初始化滚动条
         this.initScroll()
@@ -470,11 +472,11 @@ class DaoDaoExcel {
     //初始化滚动条
     initScroll(){
         //计算纵向的高度
-        const tableHeight = this.currentObj.row * this.currentObj.cellHeight
+        const tableHeight = this.table.getBoundingRect().height
         //计算纵向显示高度
         const tableWrapperHeight = this.canvas.getHeight() - headerHeight
         //计算横向的宽度
-        const tableWidth = this.currentObj.span * this.currentObj.cellWidth
+        const tableWidth = this.table.getBoundingRect().width
         //计算横向显示宽度
         const tableWrapperWidth = this.canvas.getWidth() - indexWidth
         
@@ -484,6 +486,76 @@ class DaoDaoExcel {
             fullWidth:tableWidth,
             wrapWidth:tableWrapperWidth,
             wrapperId:this.currentObj.id
+        })
+        this.scroll.on('scrollY',(e) => {
+            let positionX = this.table.position[0]
+            let moveY = e.pageMove
+            if(moveY > 0){
+                moveY = 0
+            }
+            if(moveY < -(tableHeight - tableWrapperHeight + scrollWidth)){
+                moveY = -(tableHeight - tableWrapperHeight + scrollWidth)
+            }
+            this.table.attr('position',[positionX, moveY])
+            let positionIndexX = this.tableIndex.position[0]
+            this.tableIndex.attr('position',[positionIndexX,moveY])
+            if(this.selectedCell){
+                 this.selectedCell.attr('position',[positionX,moveY])
+            }
+        })
+        this.scroll.on('scrollX',(e) => {
+            let positionY = this.table.position[1]
+            let moveX = e.pageMove
+            if(moveX > 0){
+                moveX = 0
+            }
+            if(moveX < -(tableWidth - tableWrapperWidth + scrollWidth)){
+                moveX = -(tableWidth - tableWrapperWidth + scrollWidth)
+            }
+            this.table.attr('position',[moveX, positionY])
+            let positionHeaderY = this.tableHeader.position[1]
+            this.tableHeader.attr('position',[moveX, positionHeaderY])
+            if(this.selectedCell){
+                 this.selectedCell.attr('position',[moveX, positionY])
+            }
+        })
+        this.canvas.on('mousewheel',(event) => {
+            //判断需不需要滚动
+            if(tableHeight < tableWrapperHeight){
+                return false
+            }
+            if(mouseWheelDirection(event.event)){
+                //table滚动
+                //index滚动
+                let positionX = this.table.position[0]
+                let positionY = this.table.position[1]
+                let moveY = positionY + 20
+                if(moveY > 0){
+                    moveY = 0
+                }
+                this.scroll.scrollY(moveY)
+                this.table.attr('position',[positionX, moveY])
+                let positionIndexX = this.tableIndex.position[0]
+                this.tableIndex.attr('position',[positionIndexX,moveY])
+                if(this.selectedCell){
+                     this.selectedCell.attr('position',[positionX,moveY])
+                }
+                //更新滚动条位置                
+            }else{
+                let positionX = this.table.position[0]
+                let positionY = this.table.position[1]
+                let moveY = positionY - 20
+                if(moveY < -(tableHeight - tableWrapperHeight + scrollWidth)){
+                    moveY = -(tableHeight - tableWrapperHeight + scrollWidth)
+                }
+                this.scroll.scrollY(moveY)
+                this.table.attr('position',[positionX,moveY])
+                let positionIndexX = this.tableIndex.position[0]
+                this.tableIndex.attr('position',[positionIndexX,moveY])
+                if(this.selectedCell){
+                    this.selectedCell.attr('position',[positionX,moveY])
+                }
+            }
         })
     }
 }

@@ -21,8 +21,9 @@ class TableHeaderCell extends zrender.Rect{
                 text:letter[config.index],
                 stroke: '#aaa',
                 fill: 'white',
-                lineWidth:'1'
-            }
+                lineWidth:'1',
+            },
+            zlevel:1000
         }
         let finnalconfig = Object.assign({},defaultConfig,config,countConfig)
         super(finnalconfig)
@@ -32,7 +33,7 @@ class TableHeaderCell extends zrender.Rect{
         this.type = 'tableHeaderCell'
     }
     selectCell(){
-        this.attr({style:{fill:'rgba(1,136,251,0.1)'}})
+        this.attr({style:{fill:'rgb(160,212,255)'}})
     }
     unSelectCell(){
         this.attr({style:{fill:'#fff'}})

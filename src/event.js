@@ -8,12 +8,12 @@ class Event {
         }
         this.handlers[type].push(handler)
     }
-    emit(event){
+    emit(type,event){
         if(!event.target){
             event.target = this
         }
-        if(this.handlers[event.type] instanceof Array){
-            const handlers = this.handlers[event.type]
+        if(this.handlers[type] instanceof Array){
+            const handlers = this.handlers[type]
             handlers.forEach((handler)=>{
                 handler(event)
             })

@@ -8,8 +8,9 @@ class SelectCell extends zrender.Rect{
             style:{
                 stroke: '#4e9fff',
                 lineWidth:'2',
-                fill:'none'
-            }
+                fill:'none',
+            },
+            zlevel:999
         }
         let config = {
             shape:{
@@ -34,8 +35,8 @@ class SelectCell extends zrender.Rect{
             config.shape.x = 1 + xstart * data.cellWidth + indexWidth
             config.shape.y = 1 + ystart * data.cellHeight + headerHeight
             //下标最大的是终点
-            config.shape.width = (xend - xstart + 1) * data.cellWidth
-            config.shape.height = (yend - ystart + 1) * data.cellHeight
+            shape.width = (xend - xstart + 1) * data.cellWidth
+            shape.height = (yend - ystart + 1) * data.cellHeight
         }
         let finalConfig = Object.assign({},originConfig,config)
         super(finalConfig)

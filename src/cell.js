@@ -10,7 +10,8 @@ class Cell extends zrender.Rect{
                 stroke: '#aaa',
                 fill: 'white',
                 lineWidth:'1'
-            }
+            },
+            zlevel:1
         }
         //由于zrender的Rect描边粗细有bug，所以我的做法是先放大两倍然后再缩放0.5倍
         let xPlace = 1 + data.cellWidth * data.x  * 2 + indexWidth * 2
