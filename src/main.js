@@ -5,7 +5,8 @@ import TableHeaderCell from './tableHeaderCell.js'
 import TableIndexCell from './tableIndexCell.js'
 import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
 import Scroll from './scroll.js'
-import { mouseWheelDirection } from "./utils.js"
+import Edit from './edit.js'
+import { mouseWheelDirection, preventDefault } from "./utils.js"
 
 class DaoDaoExcel {
     constructor(obj){
@@ -34,6 +35,8 @@ class DaoDaoExcel {
         this.tableIndexCell = []
         //左上角的那个什么也没有的格子
         this.selectAllCell = null
+        //可编辑的div
+        this.edit = null
         this.init()
     }
     init(){
@@ -64,11 +67,13 @@ class DaoDaoExcel {
                 width:indexWidth * 2,
                 height:headerHeight * 2
             },
-            zlevel:1001
+            z:1001
         })
-        //初始化滚动条
-        this.initScroll()
         this.canvas.add(this.selectAllCell)
+       //初始化滚动条
+       this.initScroll()
+       //初始化编辑框
+       this.initEdit(parent)
        //绑定事件
        this.initEvents()
     }
@@ -113,11 +118,13 @@ class DaoDaoExcel {
             }
         }
         this.table.on('mousedown',(event) => {
+            //隐藏输入框
+            this.edit.hideEdit()
             this.cancelSelectCell()
             //设置选中单元格为当前单击的单元格
-            this.selectCells = [event.target]
+            this.selectCells = [event.target.parent]
             //设置激活的单元格尾当前单击的单元格
-            this.activeCell = event.target
+            this.activeCell = event.target.parent
             //初始化选中的蓝色框框
             if(this.selectedCell){
                 //如果有选择框了就更新位置
@@ -137,11 +144,27 @@ class DaoDaoExcel {
             this.changeHeaderAndIndexState(this.selectCells)
             this.table.on('mousemove',this.handleTableMouseMove,this)
         })
+        //鼠标双击进入编辑模式
+        this.table.on("dblclick",(event) => {
+            //计算可编辑div的位置
+            let x = event.target.parent.data.x
+            let y = event.target.parent.data.y
+            let width = event.target.parent.data.cellWidth
+            let height = event.target.parent.data.cellHeight
+            //得到x方向和y方向的位移
+            let movex = this.table.position[0]
+            let movey = this.table.position[1]
+            let positionX = width * x + indexWidth + 1 + movex
+            let positionY = height * y + headerHeight + 1 + movey
+            let data = event.target.parent.data.text
+            //改变编辑框的状态
+            this.edit.setPosition(width,height,positionX,positionY,data)
+        })
     }
     handleTableMouseMove(event){
         //计算当前拖动到的单元格的下标
-        const x = event.target.data.x
-        const y = event.target.data.y
+        const x = event.target.parent.data.x
+        const y = event.target.parent.data.y
         //根据activeCell和当前的下标，动态的改变selectCells
         const ax = this.activeCell.data.x
         const ay = this.activeCell.data.y
@@ -196,11 +219,6 @@ class DaoDaoExcel {
         })
         //上下左右键更改一下选中和激活的单元格
         document.addEventListener('keydown',(event) => {
-            if (event.preventDefault){
-                event.preventDefault();
-            }else{
-                event.returnValue=false;
-            }
             const keyCode = event.keyCode || event.which
             //获取到activeCell的下标
             if(!this.activeCell){
@@ -210,38 +228,80 @@ class DaoDaoExcel {
             let y = this.activeCell.data.y
             switch(keyCode){
                 case 38:
+                    preventDefault(event)
                     //上
                     //如果y = 0,就阻止，否则 y - 1
                     if(y > 0){
                         y -= 1
+                        this.edit.hideEdit()
+
+                        this.activeCell = this.cells[x][y]
+                        this.cancelSelectCell()
+                        this.selectCells = [this.activeCell]
+                        this.selectedCell.change(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
                     }
                     break;
                 case 40:
                     //下
+                    preventDefault(event)
                     if(y < this.currentObj.row - 1){
                         y += 1
+                        this.edit.hideEdit()
+
+                        this.activeCell = this.cells[x][y]
+                        this.cancelSelectCell()
+                        this.selectCells = [this.activeCell]
+                        this.selectedCell.change(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
                     }
                     break;    
                 case 37:
                     //左
+                    preventDefault(event)
                     if(x > 0){
                         x -= 1
+                        this.edit.hideEdit()
+
+                        this.activeCell = this.cells[x][y]
+                        this.cancelSelectCell()
+                        this.selectCells = [this.activeCell]
+                        this.selectedCell.change(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
                     }
                     break;  
                 case 39:
                     //右
+                    preventDefault(event)
                     if(x < this.currentObj.span - 1){
                         x += 1
+                        this.edit.hideEdit()
+
+                        this.activeCell = this.cells[x][y]
+                        this.cancelSelectCell()
+                        this.selectCells = [this.activeCell]
+                        this.selectedCell.change(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
                     }
-                    break;      
+                    break;   
+                case 8:
+                case 46:    
+                    //删除
+                    if(!this.edit.editFlag){
+                        this.selectCells.forEach(cell => {
+                            cell.setText("")
+                        })
+                    }   
+                    break;    
             }
-            this.activeCell = this.cells[x][y]
-            this.cancelSelectCell()
-            this.selectCells = [this.activeCell]
-            this.selectedCell.change(this.selectCells,{
-                cellWidth:this.currentObj.cellWidth,
-                cellHeight:this.currentObj.cellHeight
-            })
         })
     }
     initTableHeader(){
@@ -257,11 +317,12 @@ class DaoDaoExcel {
             this.tableHeader.add(headCell)
         }
         this.tableHeader.on('mousedown',(event) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一列
             let index = event.target.data.index
             this.selectCells = []
-            console.log(this.cells)
             //更新activeCell和selectCells
             for(let x = 0;x < this.cells.length;x++){
                 if(x == index){
@@ -323,8 +384,8 @@ class DaoDaoExcel {
                         this.updateSelectState()
                     }
                     break;
-                case 'cell':
-                    targetIndex = event.target.data.x
+                case 'cellborder':
+                    targetIndex = event.target.parent.data.x
                     activeIndex = this.activeCell.data.x
                     if(targetIndex != activeIndex){
                         this.cancelSelectCell()
@@ -358,6 +419,8 @@ class DaoDaoExcel {
             this.tableIndex.add(indexCell)
         }
         this.tableIndex.on('mousedown',(event) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一行
             let index = event.target.data.index
@@ -427,8 +490,8 @@ class DaoDaoExcel {
                         this.updateSelectState()
                     }
                     break;
-                case 'cell':
-                    targetIndex = event.target.data.y
+                case 'cellborder':
+                    targetIndex = event.target.parent.data.y
                     activeIndex = this.activeCell.data.y
                     if(targetIndex != activeIndex){
                         this.cancelSelectCell()
@@ -488,6 +551,8 @@ class DaoDaoExcel {
             wrapperId:this.currentObj.id
         })
         this.scroll.on('scrollY',(e) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             let positionX = this.table.position[0]
             let moveY = e.pageMove
             if(moveY > 0){
@@ -504,6 +569,8 @@ class DaoDaoExcel {
             }
         })
         this.scroll.on('scrollX',(e) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             let positionY = this.table.position[1]
             let moveX = e.pageMove
             if(moveX > 0){
@@ -524,6 +591,8 @@ class DaoDaoExcel {
             if(tableHeight < tableWrapperHeight){
                 return false
             }
+            //隐藏编辑框
+            this.edit.hideEdit()
             if(mouseWheelDirection(event.event)){
                 //table滚动
                 //index滚动
@@ -555,6 +624,14 @@ class DaoDaoExcel {
                 if(this.selectedCell){
                     this.selectedCell.attr('position',[positionX,moveY])
                 }
+            }
+        })
+    }
+    initEdit(parent){
+        this.edit = new Edit(parent)
+        this.edit.on('update',(event) => {
+            if(event.type == 'text'){
+                this.activeCell.setText(event.text)
             }
         })
     }

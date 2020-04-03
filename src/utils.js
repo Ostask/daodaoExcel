@@ -29,3 +29,14 @@ export function mouseWheelDirection(e){
         }
     }
 }
+
+/*
+*阻止默认事件
+*/
+export function preventDefault(event){
+    if (event.preventDefault){
+        event.preventDefault();
+    }else{
+        event.returnValue=false;
+    }
+}

@@ -23,7 +23,7 @@ class TableHeaderCell extends zrender.Rect{
                 fill: 'white',
                 lineWidth:'1',
             },
-            zlevel:1000
+            z:1000
         }
         let finnalconfig = Object.assign({},defaultConfig,config,countConfig)
         super(finnalconfig)
