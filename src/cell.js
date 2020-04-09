@@ -30,25 +30,48 @@ class Cell extends zrender.Group{
         super({
             position:[xPlace,yPlace]
         })
-        this.data = data
+        this.data = Object.assign({},data,{
+            xPlace:xPlace,
+            yPlace:yPlace
+        })
         this.type = 'cell'
         this.cell = null
         this.init(finnalconfig)
     }
+    //初始化单元格
     init(finnalconfig){
         this.cell = new zrender.Rect(finnalconfig)
         this.cell.type = 'cellborder'
         this.add(this.cell)
     }
+    //设置选中单元格样式
     selectCell(){
         this.cell.attr({style:{fill:'rgba(1,136,251,0.1)'}})
     }
+    //取消选择样式重置
     unSelectCell(){
         this.cell.attr({style:{fill:'#fff'}})
     }
+    //设置单元格文字
     setText(text){
         this.cell.attr({style:{text:text}})
         this.data.text = text
+    }
+    //设置单元格data
+    setData(data){
+        this.data = Object.assign({},this.data,data)
+        //更改cell的大小
+        this.cell.attr({shape:{
+            width:this.data.cellWidth * 2,
+            height:this.data.cellHeight * 2
+        }})
+        //更改cell的显示隐藏
+        if(this.data.merge == true && (this.data.row == 0 || this.data.span == 0)){
+            this.hide()
+        }else{
+            this.show()
+        }
+        this.attr('position',[this.data.xPlace,this.data.yPlace])
     }
 }
 

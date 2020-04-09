@@ -34,6 +34,57 @@ class Scroll extends Event{
                 document.removeEventListener('mousemove',this.mouseMoveX)
             }
         })
+       this.addScrollY()
+       this.addScrollX()
+    }
+    scrollY(moveY){
+        //将进度换算成进度条的移动
+        let moveScroll =  - moveY / this.config.fullHeight * this.config.wrapHeight
+        if(moveScroll < 0){
+            moveScroll = 0
+        }
+        if(moveScroll > this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)){
+            moveScroll = this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)
+        }
+        if(this.scrollHeight){
+            this.scrollHeightBtn.style.top = moveScroll + 'px'
+        }
+    }
+    mouseMoveY(event){
+        //鼠标拖动的距离为
+        let distance = event.pageY - this.originMouseXY[1]
+        let positionY = this.originScrollXY[1] + distance
+        if(positionY < 0){
+            positionY = 0
+        }
+        if(positionY > this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)){
+            positionY = this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)
+        }
+        this.scrollHeightBtn.style.top = positionY + 'px'
+        //换算成页面需要挪动多少
+        let pageMoveY = -positionY / this.config.wrapHeight * (this.config.fullHeight + this.config.scrollWidth)
+        this.emit('scrollY',{
+            pageMove:pageMoveY
+        })
+    }
+    mouseMoveX(event){
+        //鼠标拖动的距离为
+        let distance = event.pageX - this.originMouseXY[0]
+        let positionX = this.originScrollXY[0] + distance
+        if(positionX < 0){
+            positionX = 0
+        }
+        if(positionX > this.config.wrapWidth - (this.config.wrapWidth / this.config.fullWidth * this.config.wrapWidth)){
+            positionX = this.config.wrapWidth - (this.config.wrapWidth / this.config.fullWidth * this.config.wrapWidth)
+        }
+        this.scrollWidthBtn.style.left = positionX + 'px'
+        //换算成页面需要挪动多少
+        let pageMoveX = -positionX / this.config.wrapWidth * (this.config.fullWidth + this.config.scrollWidth)
+        this.emit('scrollX',{
+            pageMove:pageMoveX
+        })
+    }
+    addScrollY(){
         //判断是否需要加纵向滚动条
         if(this.config.wrapHeight < this.config.fullHeight){
             this.scrollHeight = document.createElement('div')
@@ -81,6 +132,8 @@ class Scroll extends Event{
                 document.addEventListener('mousemove',this.mouseMoveY)
             })
         }
+    }
+    addScrollX(){
         //判断是否需要加横向滚动条
         if(this.config.wrapWidth < this.config.fullWidth){
             this.scrollWidth = document.createElement('div')
@@ -129,52 +182,42 @@ class Scroll extends Event{
             })
         }
     }
-    scrollY(moveY){
-        //将进度换算成进度条的移动
-        let moveScroll =  - moveY / this.config.fullHeight * this.config.wrapHeight
-        if(moveScroll < 0){
-            moveScroll = 0
+    refresh(data){
+        this.config = Object.assign({},this.config,data)
+        //判断是否要纵向滚动条
+        if(this.config.wrapWidth < this.config.fullWidth){
+            if(this.scrollHeight){
+                //改一下纵向滚动条
+                //设置纵向滚动条的style
+                this.scrollHeight.style.height = `${this.config.wrapHeight}px`
+                this.scrollHeightBtn.style.height = `${this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight}px`
+            }else{
+                this.addScrollY()
+            }
+        }else{
+            //移除纵向滚动条
+            if(this.scrollHeight){
+                parent.removeChild("daodao_excel_scroll_height_wrapper")
+                this.scrollHeight = null
+            }
         }
-        if(moveScroll > this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)){
-            moveScroll = this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)
+        //判断是否要横向滚动条
+        if(this.config.wrapWidth < this.config.fullWidth){
+            if(this.scrollWidth){
+                //改一下横向滚动条
+                //设置纵向滚动条的style
+                this.scrollWidth.style.width = `${this.config.wrapWidth - this.config.scrollWidth}px`
+                this.scrollWidthBtn.style.width = `${this.config.wrapWidth / this.config.fullWidth * (this.config.wrapWidth - this.config.scrollWidth)}px`
+            }else{
+                this.addScrollX()
+            }
+        }else{
+            //移除纵向滚动条
+            if(this.scrollWidth){
+                parent.removeChild("daodao_excel_scroll_width_wrapper")
+                this.scrollWidth = null
+            }
         }
-        if(this.scrollHeight){
-            this.scrollHeightBtn.style.top = moveScroll + 'px'
-        }
-    }
-    mouseMoveY(event){
-        //鼠标拖动的距离为
-        let distance = event.pageY - this.originMouseXY[1]
-        let positionY = this.originScrollXY[1] + distance
-        if(positionY < 0){
-            positionY = 0
-        }
-        if(positionY > this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)){
-            positionY = this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)
-        }
-        this.scrollHeightBtn.style.top = positionY + 'px'
-        //换算成页面需要挪动多少
-        let pageMoveY = -positionY / this.config.wrapHeight * (this.config.fullHeight + this.config.scrollWidth)
-        this.emit('scrollY',{
-            pageMove:pageMoveY
-        })
-    }
-    mouseMoveX(event){
-        //鼠标拖动的距离为
-        let distance = event.pageX - this.originMouseXY[0]
-        let positionX = this.originScrollXY[0] + distance
-        if(positionX < 0){
-            positionX = 0
-        }
-        if(positionX > this.config.wrapWidth - (this.config.wrapWidth / this.config.fullWidth * this.config.wrapWidth)){
-            positionX = this.config.wrapWidth - (this.config.wrapWidth / this.config.fullWidth * this.config.wrapWidth)
-        }
-        this.scrollWidthBtn.style.left = positionX + 'px'
-        //换算成页面需要挪动多少
-        let pageMoveX = -positionX / this.config.wrapWidth * (this.config.fullWidth + this.config.scrollWidth)
-        this.emit('scrollX',{
-            pageMove:pageMoveX
-        })
     }
 }
 

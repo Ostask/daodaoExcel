@@ -40,3 +40,14 @@ export function preventDefault(event){
         event.returnValue=false;
     }
 }
+
+/*
+*阻止冒泡和捕获
+*/
+export function stopPropagation(event){
+    if(event && event.stopPropagation) {
+        event.stopPropagation();    // W3C标准
+    }else {
+        event.cancelBubble = true;  //ie678
+    }
+}

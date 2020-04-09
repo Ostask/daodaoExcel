@@ -6,7 +6,8 @@ import TableIndexCell from './tableIndexCell.js'
 import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
 import Scroll from './scroll.js'
 import Edit from './edit.js'
-import { mouseWheelDirection, preventDefault } from "./utils.js"
+import ContextMenu from './contextMenu.js'
+import { mouseWheelDirection, preventDefault,stopPropagation } from "./utils.js"
 
 class DaoDaoExcel {
     constructor(obj){
@@ -37,6 +38,10 @@ class DaoDaoExcel {
         this.selectAllCell = null
         //可编辑的div
         this.edit = null
+        //右键菜单
+        this.contextMenu = null
+        //改变宽度的控制柄
+        this.changeWidthLine = null
         this.init()
     }
     init(){
@@ -74,6 +79,8 @@ class DaoDaoExcel {
        this.initScroll()
        //初始化编辑框
        this.initEdit(parent)
+       //初始化右键菜单
+       this.initContextMenu(parent)
        //绑定事件
        this.initEvents()
     }
@@ -112,12 +119,20 @@ class DaoDaoExcel {
                     x:x,
                     y:y,
                     cellWidth:this.currentObj.cellWidth,
-                    cellHeight:this.currentObj.cellHeight
+                    cellHeight:this.currentObj.cellHeight,
+                    row:1,
+                    span:1,
+                    merge:false,
+                    text:""
                 })
                 this.table.add(this.cells[x][y])
             }
         }
         this.table.on('mousedown',(event) => {
+            if(event.event.button != 0){
+                //如果点击的不是鼠标左键
+                return false
+            }
             //隐藏输入框
             this.edit.hideEdit()
             this.cancelSelectCell()
@@ -128,16 +143,10 @@ class DaoDaoExcel {
             //初始化选中的蓝色框框
             if(this.selectedCell){
                 //如果有选择框了就更新位置
-                this.selectedCell.change(this.selectCells,{
-                    cellWidth:this.currentObj.cellWidth,
-                    cellHeight:this.currentObj.cellHeight
-                })
+                this.selectedCell.change(this.selectCells)
             }else{
                 //如果没有选择框就创建一个
-                this.selectedCell = new SelectCell(this.selectCells,{
-                    cellWidth:this.currentObj.cellWidth,
-                    cellHeight:this.currentObj.cellHeight
-                })
+                this.selectedCell = new SelectCell(this.selectCells)
                 this.canvas.add(this.selectedCell)
             }
             //更新一下列和行的选择状态
@@ -154,8 +163,8 @@ class DaoDaoExcel {
             //得到x方向和y方向的位移
             let movex = this.table.position[0]
             let movey = this.table.position[1]
-            let positionX = width * x + indexWidth + 1 + movex
-            let positionY = height * y + headerHeight + 1 + movey
+            let positionX = this.currentObj.cellWidth * x + indexWidth + 1 + movex
+            let positionY = this.currentObj.cellHeight * y + headerHeight + 1 + movey
             let data = event.target.parent.data.text
             //改变编辑框的状态
             this.edit.setPosition(width,height,positionX,positionY,data)
@@ -196,13 +205,24 @@ class DaoDaoExcel {
         }
 
         this.cancelSelectCell()
-        this.selectCells = []
-        for(let i = xstart;i<=xend;i++){
-            for(let j=ystart;j<=yend;j++){
-                this.selectCells.push(this.cells[i][j])
+        
+        this.selectCells = this.countSelect(xstart,xend,ystart,yend)
+        
+        this.updateSelectState()
+    }
+    countSelect(xs,xe,ys,ye){
+        let xstart = xs
+        let xend = xe
+        let ystart = ys
+        let yend = ye
+        let that = this
+        let list = []
+        for(let x = xstart;x <= xend;x++){
+            for(let y = ystart;y <= yend;y++){
+                list.push(this.cells[x][y])
             }
         }
-        this.updateSelectState()
+        return list
     }
     initEvents(){
         //取消绑定事件
@@ -291,7 +311,11 @@ class DaoDaoExcel {
                             cellHeight:this.currentObj.cellHeight
                         })
                     }
-                    break;   
+                    break;  
+                case 13:
+                    //回车
+                    this.edit.hideEdit()
+                    break;     
                 case 8:
                 case 46:    
                     //删除
@@ -315,13 +339,49 @@ class DaoDaoExcel {
             })
             this.tableHeaderCell.push(headCell)
             this.tableHeader.add(headCell)
+            headCell.addEvent('dragLine',(event)=>{
+                console.log('dragLine',event)
+                if(this.changeWidthLine){
+                    this.changeWidthLine.attr({shape:{
+                        x1:event.offsetX,
+                        y1:0,
+                        x2:event.offsetX,
+                        y2:this.canvas.getHeight()
+                    }})
+                }else{
+                    this.changeWidthLine = new zrender.Line({
+                        z:1001,
+                        shape:{
+                            x1:event.offsetX,
+                            y1:0,
+                            x2:event.offsetX,
+                            y2:this.canvas.getHeight()
+                        },
+                        style:{
+                            stroke: '#4e9fff',
+                            fill: 'none',
+                            lineWidth:'1',
+                        }
+                    })
+                    this.canvas.add(this.changeWidthLine)
+                }
+            })
+            headCell.addEvent('changeSize',(event) => {
+                console.log('changeSize',event)
+                this.canvas.remove(this.changeWidthLine)
+                this.changeWidthLine = null
+                this.refreshCell()
+            })
         }
         this.tableHeader.on('mousedown',(event) => {
+            if(event.target.type != 'headerBorder'){
+                return false
+            }
             //隐藏编辑框
             this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一列
-            let index = event.target.data.index
+            let index = event.target.parent.data.index
             this.selectCells = []
             //更新activeCell和selectCells
             for(let x = 0;x < this.cells.length;x++){
@@ -365,8 +425,8 @@ class DaoDaoExcel {
             let start
             let end
             switch (event.target.type){
-                case 'tableHeaderCell':
-                    targetIndex = event.target.data.index
+                case 'headerBorder':
+                    targetIndex = event.target.parent.data.index
                     activeIndex = this.activeCell.data.x
                     if(targetIndex != activeIndex){
                         this.cancelSelectCell()
@@ -417,13 +477,50 @@ class DaoDaoExcel {
             })
             this.tableIndexCell.push(indexCell)
             this.tableIndex.add(indexCell)
+
+            indexCell.addEvent('dragLine',(event)=>{
+                console.log('dragLine',event)
+                if(this.changeWidthLine){
+                    this.changeWidthLine.attr({shape:{
+                        x1:0,
+                        y1:event.offsetY,
+                        x2:this.canvas.getWidth(),
+                        y2:event.offsetY
+                    }})
+                }else{
+                    this.changeWidthLine = new zrender.Line({
+                        z:1001,
+                        shape:{
+                            x1:0,
+                            y1:event.offsetY,
+                            x2:this.canvas.getWidth(),
+                            y2:event.offsetY
+                        },
+                        style:{
+                            stroke: '#4e9fff',
+                            fill: 'none',
+                            lineWidth:'1',
+                        }
+                    })
+                    this.canvas.add(this.changeWidthLine)
+                }
+            })
+            indexCell.addEvent('changeSize',(event) => {
+                console.log('changeSize',event)
+                this.canvas.remove(this.changeWidthLine)
+                this.changeWidthLine = null
+                this.refreshCell()
+            })
         }
         this.tableIndex.on('mousedown',(event) => {
+            if(event.target.type != 'indexBorder'){
+                return false
+            }
             //隐藏编辑框
             this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一行
-            let index = event.target.data.index
+            let index = event.target.parent.data.index
             this.selectCells = []
             //更新activeCell和selectCells
             for(let x = 0;x < this.cells.length;x++){
@@ -469,8 +566,8 @@ class DaoDaoExcel {
             let start
             let end
             switch (event.target.type){
-                case 'tableIndexCell':
-                    targetIndex = event.target.data.index
+                case 'indexBorder':
+                    targetIndex = event.target.parent.data.index
                     activeIndex = this.activeCell.data.y
                     if(targetIndex != activeIndex){
                         this.cancelSelectCell()
@@ -558,8 +655,8 @@ class DaoDaoExcel {
             if(moveY > 0){
                 moveY = 0
             }
-            if(moveY < -(tableHeight - tableWrapperHeight + scrollWidth)){
-                moveY = -(tableHeight - tableWrapperHeight + scrollWidth)
+            if(moveY < -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)){
+                moveY = -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)
             }
             this.table.attr('position',[positionX, moveY])
             let positionIndexX = this.tableIndex.position[0]
@@ -576,8 +673,8 @@ class DaoDaoExcel {
             if(moveX > 0){
                 moveX = 0
             }
-            if(moveX < -(tableWidth - tableWrapperWidth + scrollWidth)){
-                moveX = -(tableWidth - tableWrapperWidth + scrollWidth)
+            if(moveX < -(this.scroll.config.fullWidth - this.scroll.config.wrapWidth + scrollWidth)){
+                moveX = -(this.scroll.config.fullWidth - this.scroll.config.wrapWidth + scrollWidth)
             }
             this.table.attr('position',[moveX, positionY])
             let positionHeaderY = this.tableHeader.position[1]
@@ -588,7 +685,7 @@ class DaoDaoExcel {
         })
         this.canvas.on('mousewheel',(event) => {
             //判断需不需要滚动
-            if(tableHeight < tableWrapperHeight){
+            if(this.scroll.config.fullHeight < this.scroll.config.wrapHeight){
                 return false
             }
             //隐藏编辑框
@@ -614,8 +711,8 @@ class DaoDaoExcel {
                 let positionX = this.table.position[0]
                 let positionY = this.table.position[1]
                 let moveY = positionY - 20
-                if(moveY < -(tableHeight - tableWrapperHeight + scrollWidth)){
-                    moveY = -(tableHeight - tableWrapperHeight + scrollWidth)
+                if(moveY < -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)){
+                    moveY = -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)
                 }
                 this.scroll.scrollY(moveY)
                 this.table.attr('position',[positionX,moveY])
@@ -634,6 +731,251 @@ class DaoDaoExcel {
                 this.activeCell.setText(event.text)
             }
         })
+    }
+    initContextMenu(parent){
+        this.contextMenu = new ContextMenu(parent)
+        //添加菜单
+        const clearInputBtn = this.contextMenu.addButton('清除内容',() => {
+            this.selectCells.forEach(cell => {
+                cell.setText("")
+            })
+        })
+
+        //合并单元格
+        const mergeCells = this.contextMenu.addButton('合并单元格',()=>{
+            //设置activeCell的row和span
+            //求最小下标以及最大下标
+            let xstart = this.selectCells[0].data.x
+            let ystart = this.selectCells[0].data.y
+            let xPlace = this.selectCells[0].data.xPlace
+            let yPlace = this.selectCells[0].data.yPlace
+            let xend = this.selectCells[this.selectCells.length - 1].data.x
+            let yend = this.selectCells[this.selectCells.length - 1].data.y
+            
+            let row = yend - ystart + 1
+            let span = xend - xstart + 1
+
+            let width = 0
+            let height = 0
+
+            for(let i = xstart;i<=xend;i++){
+                width += this.tableHeaderCell[i].data.width
+            }
+
+            for(let i = ystart;i<=yend;i++){
+                height += this.tableIndexCell[i].data.height
+            }
+
+            this.activeCell.setData({
+                row:row,
+                span:span,
+                merge:true,
+                cellWidth:width,
+                cellHeight:height,
+                xPlace:xPlace,
+                yPlace:yPlace,
+                mergeConfig:{
+                    xstart:xstart,
+                    ystart:ystart,
+                    xend:xend,
+                    yend:yend
+                }
+            })
+
+            console.log(this.activeCell)
+        
+            //其余的selectCells全部隐藏不显示，被merge
+            this.selectCells.forEach(cell => {
+                if(cell != this.activeCell){
+                    cell.setData({
+                        row:0,
+                        span:0,
+                        merge:true,
+                    })
+                }
+            })
+
+            //重新设置activeCell和selectCells
+            this.selectCells = [this.activeCell]
+        })
+
+        //取消合并单元格
+        const splitCell = this.contextMenu.addButton('取消合并单元格',() => {
+            //遍历一遍当前合并的单元格，重新设置他们的位置以及大小
+            let xstart = this.activeCell.data.mergeConfig.xstart
+            let ystart = this.activeCell.data.mergeConfig.ystart
+            let xend = this.activeCell.data.mergeConfig.xend
+            let yend = this.activeCell.data.mergeConfig.yend
+
+            this.selectCells = []
+
+            for(let x = xstart;x<=xend;x++){
+                for(let y=ystart;y<=yend;y++){
+                    this.cells[x][y].setData({
+                        xPlace:this.tableHeaderCell[x].data.xPlace,
+                        yPlace:this.tableIndexCell[y].data.yPlace,
+                        cellWidth:this.tableHeaderCell[x].data.width,
+                        cellHeight:this.tableIndexCell[y].data.height,
+                        merge:false,
+                        row:1,
+                        span:1,
+                        mergeConfig:null
+                    })
+                    this.cells[x][y].show()
+                    this.selectCells.push(this.cells[x][y])
+                }
+            }
+            this.selectedCell.change(this.selectCells)
+        })
+
+        //右键菜单
+        this.canvas.on("contextmenu",(event) => {
+            preventDefault(event.event)
+            //判断当前点的cell有没有在selectCells里面
+            if(event.target.parent.type == 'cell'){
+                if(this.selectCells.includes(event.target.parent)){
+                    
+                }else{
+                    this.edit.hideEdit()
+                    this.cancelSelectCell()
+                    this.activeCell = event.target.parent
+                    this.selectCells = [event.target.parent]
+                    if(this.selectedCell){
+                        //如果有选择框了就更新位置
+                        this.selectedCell.change(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
+                    }else{
+                        //如果没有选择框就创建一个
+                        this.selectedCell = new SelectCell(this.selectCells,{
+                            cellWidth:this.currentObj.cellWidth,
+                            cellHeight:this.currentObj.cellHeight
+                        })
+                        this.canvas.add(this.selectedCell)
+                    }
+                    //更新一下列和行的选择状态
+                    this.changeHeaderAndIndexState(this.selectCells)
+                }
+                //判断选中了几个单元格，如果选中了多个就显示合并单元格按钮
+                if(this.selectCells.length > 1){
+                    if(this.selectCells.every(cell => {return cell.data.merge == false})){
+                        mergeCells.style.display = "block"
+                        splitCell.style.display = "none"
+                    }else{
+                        mergeCells.style.display = "none"
+                        splitCell.style.display = "block"
+                    }
+                }else{
+                    mergeCells.style.display = "none"
+                    if(this.selectCells[0].data.merge == true){
+                        splitCell.style.display = "block"
+                    }else{
+                        splitCell.style.display = "none"
+                    }
+                }
+            }
+            //如果有就直接弹出menu
+            //如果没有就重新设置一下selectCells以及activeCell
+            this.contextMenu.showMenu(event.offsetX,event.offsetY)
+        })
+        document.addEventListener('click',()=>{
+            this.contextMenu.hideMenu()
+        })
+    }
+    //重新绘制cell
+    refreshCell(){
+        //重绘headerCell
+        this.refreshTableHeaderCell()
+        //重绘indexCell
+        this.refreshTableIndexCell()
+        //重绘tableCell
+        this.refreshTableCell()
+        //刷新选择框
+        if(this.selectCells.length > 0){
+            this.selectedCell.change(this.selectCells)
+        }
+        //刷新滚动条
+        this.refreshScroll()
+    }
+    refreshTableHeaderCell(){
+        let x = this.tableHeaderCell[0].data.xPlace
+        this.tableHeaderCell.forEach(cell => {
+            cell.setData({
+                xPlace:x
+            })
+            cell.refresh()
+            x += cell.data.width
+        })
+    }
+    refreshTableIndexCell(){
+        let y = this.tableIndexCell[0].data.yPlace
+        this.tableIndexCell.forEach(cell => {
+            cell.setData({
+                yPlace:y
+            })
+            cell.refresh()
+            y += cell.data.height
+        })
+    }
+    refreshTableCell(){
+        for(let x = 0;x<this.cells.length;x++){
+            for(let y = 0;y<this.cells[x].length;y++){
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row != 0 && this.cells[x][y].data.span !=0){
+                    //这个是合并过的单元格
+                    let xstart = this.cells[x][y].data.mergeConfig.xstart
+                    let ystart = this.cells[x][y].data.mergeConfig.ystart
+                    let xend = this.cells[x][y].data.mergeConfig.xend
+                    let yend = this.cells[x][y].data.mergeConfig.yend
+
+                    let xPlace = this.tableHeaderCell[xstart].data.xPlace
+                    let yPlace = this.tableIndexCell[ystart].data.yPlace
+                    let cellWidth = 0
+                    let cellHeight = 0
+                    for(let i = xstart;i<=xend;i++){
+                        cellWidth += this.tableHeaderCell[i].data.width
+                    }
+        
+                    for(let i = ystart;i<=yend;i++){
+                        cellHeight += this.tableIndexCell[i].data.height
+                    }
+                    this.cells[x][y].setData({
+                        xPlace:xPlace,
+                        yPlace:yPlace,
+                        cellWidth:cellWidth,
+                        cellHeight:cellHeight
+                    })
+                }else{
+                    let xPlace = this.tableHeaderCell[x].data.xPlace
+                    let yPlace = this.tableIndexCell[y].data.yPlace
+                    let cellWidth = this.tableHeaderCell[x].data.width
+                    let cellHeight = this.tableIndexCell[y].data.height
+                    this.cells[x][y].setData({
+                        xPlace:xPlace,
+                        yPlace:yPlace,
+                        cellWidth:cellWidth,
+                        cellHeight:cellHeight
+                    })
+                }
+            }
+        }
+    }
+    refreshScroll(){
+        //计算纵向的高度
+        const tableHeight = this.table.getBoundingRect().height
+        //计算纵向显示高度
+        const tableWrapperHeight = this.canvas.getHeight() - headerHeight
+        //计算横向的宽度
+        const tableWidth = this.table.getBoundingRect().width
+        //计算横向显示宽度
+        const tableWrapperWidth = this.canvas.getWidth() - indexWidth
+        let data = {
+            fullHeight:tableHeight,
+            wrapHeight:tableWrapperHeight,
+            fullWidth:tableWidth,
+            wrapWidth:tableWrapperWidth,
+        }
+        this.scroll.refresh(data)
     }
 }
 
