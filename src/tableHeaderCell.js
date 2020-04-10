@@ -1,6 +1,6 @@
 import zrender from 'zrender'
 import {letter,indexWidth} from './config.js'
-import { mouseWheelDirection, preventDefault,stopPropagation } from "./utils.js"
+import { mouseWheelDirection, preventDefault,stopPropagation,generateCode } from "./utils.js"
 
 class TableHeaderCell extends zrender.Group{
     constructor(config){
@@ -19,7 +19,7 @@ class TableHeaderCell extends zrender.Group{
                 height:config.cellHeight * 2
             },
             style:{
-                text:letter[config.index],
+                text:generateCode(config.index),
                 stroke: '#aaa',
                 fill: 'white',
                 lineWidth:'1',
@@ -143,6 +143,9 @@ class TableHeaderCell extends zrender.Group{
     }
     setData(data){
         this.data = Object.assign({},this.data,data)
+        this.box.attr({style:{
+            text:generateCode(this.data.index)
+        }})
     }
 }
 

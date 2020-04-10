@@ -7,6 +7,7 @@ import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
 import Scroll from './scroll.js'
 import Edit from './edit.js'
 import ContextMenu from './contextMenu.js'
+import UploadFile from './uploadFile.js'
 import { mouseWheelDirection, preventDefault,stopPropagation } from "./utils.js"
 
 class DaoDaoExcel {
@@ -42,6 +43,8 @@ class DaoDaoExcel {
         this.contextMenu = null
         //改变宽度的控制柄
         this.changeWidthLine = null
+        //上传图片的组件
+        this.uploadFile = null
         this.init()
     }
     init(){
@@ -79,10 +82,18 @@ class DaoDaoExcel {
        this.initScroll()
        //初始化编辑框
        this.initEdit(parent)
+       //初始化上传文件
+       this.initUploadFile(parent)
        //初始化右键菜单
        this.initContextMenu(parent)
        //绑定事件
        this.initEvents()
+    }
+    initUploadFile(parent){
+        this.uploadFile = new UploadFile(parent)
+        this.uploadFile.on('changeImage',(event) => {
+            this.activeCell.addImage(event.url)
+        })
     }
     //取消选择单元格
     cancelSelectCell(){
@@ -163,8 +174,8 @@ class DaoDaoExcel {
             //得到x方向和y方向的位移
             let movex = this.table.position[0]
             let movey = this.table.position[1]
-            let positionX = this.currentObj.cellWidth * x + indexWidth + 1 + movex
-            let positionY = this.currentObj.cellHeight * y + headerHeight + 1 + movey
+            let positionX = event.target.parent.data.xPlace + movex
+            let positionY = event.target.parent.data.yPlace + movey
             let data = event.target.parent.data.text
             //改变编辑框的状态
             this.edit.setPosition(width,height,positionX,positionY,data)
@@ -328,57 +339,58 @@ class DaoDaoExcel {
             }
         })
     }
-    initTableHeader(){
-        this.tableHeader = new zrender.Group()
-        this.canvas.add(this.tableHeader)
-        for(let i = 0;i<this.currentObj.span;i++){
-            let headCell = new TableHeaderCell({
-                cellWidth:this.currentObj.cellWidth,
-                cellHeight:headerHeight,
-                index:i
-            })
-            this.tableHeaderCell.push(headCell)
-            this.tableHeader.add(headCell)
-            headCell.addEvent('dragLine',(event)=>{
-                console.log('dragLine',event)
-                if(this.changeWidthLine){
-                    this.changeWidthLine.attr({shape:{
+    addTableHeaderCell(config){
+        let headCell = new TableHeaderCell(config)
+        this.tableHeaderCell.splice(config.index,0,headCell)
+        this.tableHeader.add(headCell)
+        headCell.addEvent('dragLine',(event)=>{
+            if(this.changeWidthLine){
+                this.changeWidthLine.attr({shape:{
+                    x1:event.offsetX,
+                    y1:0,
+                    x2:event.offsetX,
+                    y2:this.canvas.getHeight()
+                }})
+            }else{
+                this.changeWidthLine = new zrender.Line({
+                    z:1001,
+                    shape:{
                         x1:event.offsetX,
                         y1:0,
                         x2:event.offsetX,
                         y2:this.canvas.getHeight()
-                    }})
-                }else{
-                    this.changeWidthLine = new zrender.Line({
-                        z:1001,
-                        shape:{
-                            x1:event.offsetX,
-                            y1:0,
-                            x2:event.offsetX,
-                            y2:this.canvas.getHeight()
-                        },
-                        style:{
-                            stroke: '#4e9fff',
-                            fill: 'none',
-                            lineWidth:'1',
-                        }
-                    })
-                    this.canvas.add(this.changeWidthLine)
-                }
-            })
-            headCell.addEvent('changeSize',(event) => {
-                console.log('changeSize',event)
-                this.canvas.remove(this.changeWidthLine)
-                this.changeWidthLine = null
-                this.refreshCell()
+                    },
+                    style:{
+                        stroke: '#4e9fff',
+                        fill: 'none',
+                        lineWidth:'1',
+                    }
+                })
+                this.canvas.add(this.changeWidthLine)
+            }
+        })
+        headCell.addEvent('changeSize',(event) => {
+            this.canvas.remove(this.changeWidthLine)
+            this.changeWidthLine = null
+            this.refreshCell()
+        })
+    }
+    initTableHeader(){
+        this.tableHeader = new zrender.Group()
+        this.canvas.add(this.tableHeader)
+        for(let i = 0;i<this.currentObj.span;i++){
+            this.addTableHeaderCell({
+                cellWidth:this.currentObj.cellWidth,
+                cellHeight:headerHeight,
+                index:i
             })
         }
         this.tableHeader.on('mousedown',(event) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             if(event.target.type != 'headerBorder'){
                 return false
             }
-            //隐藏编辑框
-            this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一列
             let index = event.target.parent.data.index
@@ -466,58 +478,59 @@ class DaoDaoExcel {
             }
         }
     }
-    initTableIndex(){
-        this.tableIndex = new zrender.Group()
-        this.canvas.add(this.tableIndex)
-        for(let i = 0;i < this.currentObj.row;i++){
-            let indexCell = new TableIndexCell({
-                cellWidth:indexWidth,
-                cellHeight:this.currentObj.cellHeight,
-                index:i
-            })
-            this.tableIndexCell.push(indexCell)
-            this.tableIndex.add(indexCell)
+    addTableIndexCell(config){
+        let indexCell = new TableIndexCell(config)
+        this.tableIndexCell.splice(config.index,0,indexCell)
+        this.tableIndex.add(indexCell)
 
-            indexCell.addEvent('dragLine',(event)=>{
-                console.log('dragLine',event)
-                if(this.changeWidthLine){
-                    this.changeWidthLine.attr({shape:{
+        indexCell.addEvent('dragLine',(event)=>{
+            if(this.changeWidthLine){
+                this.changeWidthLine.attr({shape:{
+                    x1:0,
+                    y1:event.offsetY,
+                    x2:this.canvas.getWidth(),
+                    y2:event.offsetY
+                }})
+            }else{
+                this.changeWidthLine = new zrender.Line({
+                    z:1001,
+                    shape:{
                         x1:0,
                         y1:event.offsetY,
                         x2:this.canvas.getWidth(),
                         y2:event.offsetY
-                    }})
-                }else{
-                    this.changeWidthLine = new zrender.Line({
-                        z:1001,
-                        shape:{
-                            x1:0,
-                            y1:event.offsetY,
-                            x2:this.canvas.getWidth(),
-                            y2:event.offsetY
-                        },
-                        style:{
-                            stroke: '#4e9fff',
-                            fill: 'none',
-                            lineWidth:'1',
-                        }
-                    })
-                    this.canvas.add(this.changeWidthLine)
-                }
-            })
-            indexCell.addEvent('changeSize',(event) => {
-                console.log('changeSize',event)
-                this.canvas.remove(this.changeWidthLine)
-                this.changeWidthLine = null
-                this.refreshCell()
+                    },
+                    style:{
+                        stroke: '#4e9fff',
+                        fill: 'none',
+                        lineWidth:'1',
+                    }
+                })
+                this.canvas.add(this.changeWidthLine)
+            }
+        })
+        indexCell.addEvent('changeSize',(event) => {
+            this.canvas.remove(this.changeWidthLine)
+            this.changeWidthLine = null
+            this.refreshCell()
+        })
+    }
+    initTableIndex(){
+        this.tableIndex = new zrender.Group()
+        this.canvas.add(this.tableIndex)
+        for(let i = 0;i < this.currentObj.row;i++){
+            this.addTableIndexCell({
+                cellWidth:indexWidth,
+                cellHeight:this.currentObj.cellHeight,
+                index:i
             })
         }
         this.tableIndex.on('mousedown',(event) => {
+            //隐藏编辑框
+            this.edit.hideEdit()
             if(event.target.type != 'indexBorder'){
                 return false
             }
-            //隐藏编辑框
-            this.edit.hideEdit()
             this.cancelSelectCell()
             //选中的是哪一行
             let index = event.target.parent.data.index
@@ -735,9 +748,134 @@ class DaoDaoExcel {
     initContextMenu(parent){
         this.contextMenu = new ContextMenu(parent)
         //添加菜单
+
+        const addSpan = this.contextMenu.addButton('插入列',()=>{
+            //tableHeaderCell插入列
+            const index = this.activeCell.data.x
+            this.addTableHeaderCell({
+                cellWidth:this.currentObj.cellWidth,
+                cellHeight:headerHeight,
+                index:index + 1
+            })
+            //更新所有tableHeaderCell的data和位置
+            for(let i = index;i<this.tableHeaderCell.length;i++){
+                this.tableHeaderCell[i].setData({index:i})
+            }
+            //cells插入列
+            let insertArr = new Array()
+            for(let y = 0;y < this.tableIndexCell.length;y++){
+                insertArr[y] = new Cell({
+                    x:index+1,
+                    y:y,
+                    cellWidth:this.currentObj.cellWidth,
+                    cellHeight:this.currentObj.cellHeight,
+                    row:1,
+                    span:1,
+                    merge:false,
+                    text:""
+                })
+                this.table.add(insertArr[y])
+            }
+            this.cells.splice(index+1,0,insertArr)
+            //更新所有cells的xy
+            for(let x = index;x<this.cells.length;x++){
+                for(let y=0;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                    //如果这个单元格是合并的单元格
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                        //如果index在merge的单元格之中
+                        if(index >= this.cells[x][y].data.mergeConfig.xstart && index < this.cells[x][y].data.mergeConfig.xend){
+                            this.cells[x][y].data.mergeConfig.xend += 1
+                        } 
+                         //如果index在merge之前
+                         if(index < this.cells[x][y].data.mergeConfig.xstart){
+                            this.cells[x][y].data.mergeConfig.xstart += 1
+                            this.cells[x][y].data.mergeConfig.xend += 1
+                        }
+                    }
+                    //如果左右都是row=0,span=0,则被合并
+                    if(x > 0 && x < this.cells.length - 1){
+                        if(this.cells[x-1][y].data.merge && this.cells[x+1][y].data.merge){
+                            this.cells[x][y].setData({
+                                row:0,
+                                span:0,
+                                merge:true
+                            })
+                        }
+                    }
+                }
+            }
+            //更新整个视图
+            this.refreshCell()
+        })
+
+        const addRow = this.contextMenu.addButton('插入行',()=>{
+            //tableHeaderCell插入列
+            const index = this.activeCell.data.y
+            this.addTableIndexCell({
+                cellWidth:indexWidth,
+                cellHeight:this.currentObj.cellHeight,
+                index:index + 1
+            })
+            //更新所有tableHeaderCell的data和位置
+            for(let i = index;i<this.tableIndexCell.length;i++){
+                this.tableIndexCell[i].setData({index:i})
+            }
+            //cells插入行
+            for(let x = 0;x < this.cells.length;x++){
+                let insert = new Cell({
+                    x:x,
+                    y:index + 1,
+                    cellWidth:this.currentObj.cellWidth,
+                    cellHeight:this.currentObj.cellHeight,
+                    row:1,
+                    span:1,
+                    merge:false,
+                    text:""
+                })
+                this.cells[x].splice(index+1,0,insert)
+                this.table.add(insert)
+            }
+            //更新所有cells的xy
+            for(let x = 0;x<this.cells.length;x++){
+                for(let y=index;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                    //如果这个单元格是合并的单元格
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                        //如果index在merge的单元格之中
+                        if(index >= this.cells[x][y].data.mergeConfig.ystart && index < this.cells[x][y].data.mergeConfig.yend){
+                            this.cells[x][y].data.mergeConfig.yend += 1
+                        } 
+                        //如果index在merge之前
+                        if(index < this.cells[x][y].data.mergeConfig.ystart){
+                            this.cells[x][y].data.mergeConfig.ystart += 1
+                            this.cells[x][y].data.mergeConfig.yend += 1
+                        }
+                    }
+                    //如果左右都是row=0,span=0,则被合并
+                    if(y > 0 && y < this.cells[x].length - 1){
+                        if(this.cells[x][y-1].data.merge && this.cells[x][y+1].data.merge){
+                            this.cells[x][y].setData({
+                                row:0,
+                                span:0,
+                                merge:true
+                            })
+                        }
+                    }
+                }
+            }
+            //更新整个视图
+            this.refreshCell()
+        })
+
+        const addImage = this.contextMenu.addButton('插入图片',()=>{
+            this.uploadFile.open()
+        })
+
         const clearInputBtn = this.contextMenu.addButton('清除内容',() => {
             this.selectCells.forEach(cell => {
                 cell.setText("")
+                cell.removeImage()
             })
         })
 
@@ -832,7 +970,7 @@ class DaoDaoExcel {
         this.canvas.on("contextmenu",(event) => {
             preventDefault(event.event)
             //判断当前点的cell有没有在selectCells里面
-            if(event.target.parent.type == 'cell'){
+            if(event.target.parent && event.target.parent.type == 'cell'){
                 if(this.selectCells.includes(event.target.parent)){
                     
                 }else{
@@ -859,6 +997,7 @@ class DaoDaoExcel {
                 }
                 //判断选中了几个单元格，如果选中了多个就显示合并单元格按钮
                 if(this.selectCells.length > 1){
+                    addImage.style.display='none'
                     if(this.selectCells.every(cell => {return cell.data.merge == false})){
                         mergeCells.style.display = "block"
                         splitCell.style.display = "none"
@@ -868,6 +1007,7 @@ class DaoDaoExcel {
                     }
                 }else{
                     mergeCells.style.display = "none"
+                    addImage.style.display='block'
                     if(this.selectCells[0].data.merge == true){
                         splitCell.style.display = "block"
                     }else{
@@ -897,6 +1037,7 @@ class DaoDaoExcel {
         }
         //刷新滚动条
         this.refreshScroll()
+        console.log(this.cells)
     }
     refreshTableHeaderCell(){
         let x = this.tableHeaderCell[0].data.xPlace

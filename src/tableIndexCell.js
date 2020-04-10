@@ -144,6 +144,9 @@ class TableHeaderCell extends zrender.Group{
     }
     setData(data){
         this.data = Object.assign({},this.data,data)
+        this.box.attr({style:{
+            text:this.data.index+1
+        }})
     }
 }
 

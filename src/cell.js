@@ -1,6 +1,5 @@
 import zrender from 'zrender'
 import {headerHeight,indexWidth} from './config'
-import data from "./test.js"
 
 class Cell extends zrender.Group{
     constructor(data,config){
@@ -35,6 +34,7 @@ class Cell extends zrender.Group{
             yPlace:yPlace
         })
         this.type = 'cell'
+        this.img = null
         this.cell = null
         this.init(finnalconfig)
     }
@@ -65,6 +65,14 @@ class Cell extends zrender.Group{
             width:this.data.cellWidth * 2,
             height:this.data.cellHeight * 2
         }})
+        if(this.img){
+            this.img.attr({
+                style:{
+                    width:this.data.cellWidth,
+                    height:this.data.cellHeight
+                }
+            })
+        }
         //更改cell的显示隐藏
         if(this.data.merge == true && (this.data.row == 0 || this.data.span == 0)){
             this.hide()
@@ -72,6 +80,33 @@ class Cell extends zrender.Group{
             this.show()
         }
         this.attr('position',[this.data.xPlace,this.data.yPlace])
+    }
+    //添加图片
+    addImage(url){
+        this.data.imgUrl = url
+        if(this.img){
+            this.remove(this.img)
+            this.img = null
+        }
+        this.setText("")
+        this.img = new zrender.Image({
+            style:{
+                image:url,
+                x:0,
+                y:0,
+                width:this.data.cellWidth,
+                height:this.data.cellHeight
+            },
+            z:2
+        })
+        this.add(this.img)
+    }
+    removeImage(){
+        if(this.img){
+            this.remove(this.img)
+            this.img = null
+            this.data.imgUrl = ""
+        }
     }
 }
 
