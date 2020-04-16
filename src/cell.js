@@ -6,12 +6,6 @@ class Cell extends zrender.Group{
         let defaultCellConfig = {
             cursor:'default',
             scale:[0.5,0.5],
-            style:{
-                stroke: '#aaa',
-                fill: 'white',
-                lineWidth:'1',
-                fontSize:14,
-            },
             z:1
         }
         //由于zrender的Rect描边粗细有bug，所以我的做法是先放大两倍然后再缩放0.5倍
@@ -23,6 +17,15 @@ class Cell extends zrender.Group{
                 y:1,
                 width:data.cellWidth * 2,
                 height:data.cellHeight * 2
+            },
+            style:{
+                stroke: '#aaa',
+                fill: 'white',
+                lineWidth:'1',
+                fontSize:data.fontSize,
+                fontFamily:data.fontFamily,
+                fontWeight:data.fontWeight,
+                fontStyle:data.fontStyle
             }
         }
         let finnalconfig = Object.assign({},defaultCellConfig,config,countConfig)
@@ -56,6 +59,26 @@ class Cell extends zrender.Group{
     setText(text){
         this.cell.attr({style:{text:text}})
         this.data.text = text
+    }
+    //设置字体
+    setFontFamily(font){
+        this.cell.attr({style:{fontFamily:font}})
+        this.data.fontFamily = font
+    }
+    //设置字体大小
+    setFontSize(size){
+        this.cell.attr({style:{fontSize:size}})
+        this.data.fontSize = size
+    }
+    //设置文字粗细
+    setFontWeight(data){
+        this.cell.attr({style:{fontWeight:data}})
+        this.data.fontWeight = data
+    }
+    //设置文字倾斜
+    setFontItalic(data){
+        this.cell.attr({style:{fontStyle:data}})
+        this.data.fontStyle = data
     }
     //设置单元格data
     setData(data){

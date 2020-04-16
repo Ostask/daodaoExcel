@@ -23,9 +23,9 @@ class Scroll extends Event{
         //鼠标点下去的时候的x,y坐标
         this.originMouseXY = [0,0]
         this.originScrollXY = [0,0]
-        this.init()
+        this.init(config.parent)
     }
-    init(){
+    init(parent){
         document.addEventListener('mouseup',()=>{
             if(this.mouseMoveY){
                 document.removeEventListener('mousemove',this.mouseMoveY)
@@ -34,8 +34,8 @@ class Scroll extends Event{
                 document.removeEventListener('mousemove',this.mouseMoveX)
             }
         })
-       this.addScrollY()
-       this.addScrollX()
+       this.addScrollY(parent)
+       this.addScrollX(parent)
     }
     scrollY(moveY){
         //将进度换算成进度条的移动
@@ -92,7 +92,7 @@ class Scroll extends Event{
             this.scrollHeightBtn = document.createElement('div')
             this.scrollHeightBtn.id = "daodao_excel_scroll_height_btn"
             this.scrollHeight.appendChild(this.scrollHeightBtn)
-            const parent = document.getElementById(this.config.wrapperId) 
+            const parent = this.config.parent
             parent.appendChild(this.scrollHeight)
             parent.style.position = "relative"
 
@@ -141,7 +141,7 @@ class Scroll extends Event{
             this.scrollWidthBtn = document.createElement('div')
             this.scrollWidthBtn.id = "daodao_excel_scroll_width_btn"
             this.scrollWidth.appendChild(this.scrollWidthBtn)
-            const parent = document.getElementById(this.config.wrapperId) 
+            const parent = this.config.parent
             parent.appendChild(this.scrollWidth)
             parent.style.position = "relative"
 

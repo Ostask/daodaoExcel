@@ -8,7 +8,8 @@ import Scroll from './scroll.js'
 import Edit from './edit.js'
 import ContextMenu from './contextMenu.js'
 import UploadFile from './uploadFile.js'
-import { mouseWheelDirection, preventDefault,stopPropagation } from "./utils.js"
+import ToolBar from './toolBar.js'
+import { mouseWheelDirection, preventDefault,stopPropagation ,generateUUID} from "./utils.js"
 
 class DaoDaoExcel {
     constructor(obj){
@@ -45,6 +46,14 @@ class DaoDaoExcel {
         this.changeWidthLine = null
         //上传图片的组件
         this.uploadFile = null
+        //工具条
+        this.toolBar = null
+        //默认文字状态
+        this.textConfig = {
+            'fontFamily':'微软雅黑',
+            'fontSize':14,
+            'fontStyle':'normal'
+        }
         this.init()
     }
     init(){
@@ -55,8 +64,13 @@ class DaoDaoExcel {
            //JavaScript引擎一旦遇到throw语句，就会停止执行后面的语句，并将throw语句的参数值，返回给用户。
            throw new Error("没有找到id为"+this.currentObj.id+"的元素!");
         }
+        const canvasWrapper = document.createElement('div')
+        canvasWrapper.id = generateUUID()
+        canvasWrapper.style.width = parent.clientWidth + 'px'
+        canvasWrapper.style.height = (parent.clientHeight - 30) + 'px'
+        parent.appendChild(canvasWrapper)
        //新建canvas
-       this.canvas = zrender.init(parent);
+       this.canvas = zrender.init(canvasWrapper);
        this.initCells()
        this.initTableHeader()
        this.initTableIndex()
@@ -79,13 +93,15 @@ class DaoDaoExcel {
         })
         this.canvas.add(this.selectAllCell)
        //初始化滚动条
-       this.initScroll()
+       this.initScroll(canvasWrapper)
        //初始化编辑框
-       this.initEdit(parent)
+       this.initEdit(canvasWrapper)
        //初始化上传文件
        this.initUploadFile(parent)
        //初始化右键菜单
-       this.initContextMenu(parent)
+       this.initContextMenu(canvasWrapper)
+       //初始化工具条
+       this.initToolBar(parent)
        //绑定事件
        this.initEvents()
     }
@@ -126,7 +142,7 @@ class DaoDaoExcel {
         for(let x = 0;x < this.currentObj.span;x++){
             this.cells[x] = new Array()
             for(let y = 0;y < this.currentObj.row;y++){
-                this.cells[x][y] = new Cell({
+                this.cells[x][y] = new Cell({...{
                     x:x,
                     y:y,
                     cellWidth:this.currentObj.cellWidth,
@@ -135,11 +151,13 @@ class DaoDaoExcel {
                     span:1,
                     merge:false,
                     text:""
-                })
+                },...this.textConfig})
                 this.table.add(this.cells[x][y])
             }
         }
         this.table.on('mousedown',(event) => {
+            //将工具条的状态改变得和cell的状态一致
+            this.toolBar.setConfig(event.target.parent.data)
             if(event.event.button != 0){
                 //如果点击的不是鼠标左键
                 return false
@@ -643,7 +661,7 @@ class DaoDaoExcel {
         }
     }
     //初始化滚动条
-    initScroll(){
+    initScroll(parent){
         //计算纵向的高度
         const tableHeight = this.table.getBoundingRect().height
         //计算纵向显示高度
@@ -658,7 +676,7 @@ class DaoDaoExcel {
             wrapHeight:tableWrapperHeight,
             fullWidth:tableWidth,
             wrapWidth:tableWrapperWidth,
-            wrapperId:this.currentObj.id
+            parent:parent
         })
         this.scroll.on('scrollY',(e) => {
             //隐藏编辑框
@@ -794,7 +812,7 @@ class DaoDaoExcel {
                         }
                     }
                     //如果左右都是row=0,span=0,则被合并
-                    if(x > 0 && x < this.cells.length - 1){
+                    if(x==index+1 && x > 0 && x < this.cells.length - 1){
                         if(this.cells[x-1][y].data.merge && this.cells[x+1][y].data.merge){
                             this.cells[x][y].setData({
                                 row:0,
@@ -853,7 +871,7 @@ class DaoDaoExcel {
                         }
                     }
                     //如果左右都是row=0,span=0,则被合并
-                    if(y > 0 && y < this.cells[x].length - 1){
+                    if(y==index+1 && y > 0 && y < this.cells[x].length - 1){
                         if(this.cells[x][y-1].data.merge && this.cells[x][y+1].data.merge){
                             this.cells[x][y].setData({
                                 row:0,
@@ -1117,6 +1135,30 @@ class DaoDaoExcel {
             wrapWidth:tableWrapperWidth,
         }
         this.scroll.refresh(data)
+    }
+    initToolBar(parent){
+        this.toolBar = new ToolBar(parent)
+        this.toolBar.on('changeTypeFace',(e) => {
+            //更改selectCells的fontFamily
+            this.selectCells.forEach(cell => {
+                cell.setFontFamily(e.data)
+            })
+        })
+        this.toolBar.on('changeFontSize',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setFontSize(e.data)
+            })
+        })
+        this.toolBar.on('changeFontWeight',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setFontWeight(e.data)
+            })
+        })
+        this.toolBar.on('changeFontItalic',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setFontItalic(e.data)
+            })
+        })
     }
 }
 

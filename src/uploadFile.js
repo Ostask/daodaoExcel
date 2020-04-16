@@ -17,6 +17,7 @@ class UploadFile extends Event{
            let reader = new FileReader()
            reader.onload = () => {
                this.emit('changeImage',{url:reader.result})
+               this.el.value = ''
            }
            reader.readAsDataURL(file)
         })
