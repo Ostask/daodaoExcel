@@ -52,7 +52,9 @@ class DaoDaoExcel {
         this.textConfig = {
             'fontFamily':'微软雅黑',
             'fontSize':14,
-            'fontStyle':'normal'
+            'fontStyle':'normal',
+            'fontWeight':'normal',
+            'underLine':false
         }
         this.init()
     }
@@ -796,7 +798,7 @@ class DaoDaoExcel {
             }
             this.cells.splice(index+1,0,insertArr)
             //更新所有cells的xy
-            for(let x = index;x<this.cells.length;x++){
+            for(let x = 0;x<this.cells.length;x++){
                 for(let y=0;y<this.cells[x].length;y++){
                     this.cells[x][y].setData({x:x,y:y})
                     //如果这个单元格是合并的单元格
@@ -804,21 +806,22 @@ class DaoDaoExcel {
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.xstart && index < this.cells[x][y].data.mergeConfig.xend){
                             this.cells[x][y].data.mergeConfig.xend += 1
+
+                             //如果左右都是row=0,span=0,则被合并
+                            if(x==index+1 && x > 0 && x < this.cells.length - 1){
+                                if(this.cells[x-1][y].data.merge && this.cells[x+1][y].data.merge){
+                                    this.cells[x][y].setData({
+                                        row:0,
+                                        span:0,
+                                        merge:true
+                                    })
+                                }
+                            }
                         } 
                          //如果index在merge之前
                          if(index < this.cells[x][y].data.mergeConfig.xstart){
                             this.cells[x][y].data.mergeConfig.xstart += 1
                             this.cells[x][y].data.mergeConfig.xend += 1
-                        }
-                    }
-                    //如果左右都是row=0,span=0,则被合并
-                    if(x==index+1 && x > 0 && x < this.cells.length - 1){
-                        if(this.cells[x-1][y].data.merge && this.cells[x+1][y].data.merge){
-                            this.cells[x][y].setData({
-                                row:0,
-                                span:0,
-                                merge:true
-                            })
                         }
                     }
                 }
@@ -856,28 +859,28 @@ class DaoDaoExcel {
             }
             //更新所有cells的xy
             for(let x = 0;x<this.cells.length;x++){
-                for(let y=index;y<this.cells[x].length;y++){
+                for(let y=0;y<this.cells[x].length;y++){
                     this.cells[x][y].setData({x:x,y:y})
                     //如果这个单元格是合并的单元格
                     if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.ystart && index < this.cells[x][y].data.mergeConfig.yend){
                             this.cells[x][y].data.mergeConfig.yend += 1
+                            //如果左右都是row=0,span=0,则被合并
+                            if(y==index+1 && y > 0 && y < this.cells[x].length - 1){
+                                if(this.cells[x][y-1].data.merge && this.cells[x][y+1].data.merge){
+                                    this.cells[x][y].setData({
+                                        row:0,
+                                        span:0,
+                                        merge:true
+                                    })
+                                }
+                            }
                         } 
                         //如果index在merge之前
                         if(index < this.cells[x][y].data.mergeConfig.ystart){
                             this.cells[x][y].data.mergeConfig.ystart += 1
                             this.cells[x][y].data.mergeConfig.yend += 1
-                        }
-                    }
-                    //如果左右都是row=0,span=0,则被合并
-                    if(y==index+1 && y > 0 && y < this.cells[x].length - 1){
-                        if(this.cells[x][y-1].data.merge && this.cells[x][y+1].data.merge){
-                            this.cells[x][y].setData({
-                                row:0,
-                                span:0,
-                                merge:true
-                            })
                         }
                     }
                 }
@@ -1157,6 +1160,11 @@ class DaoDaoExcel {
         this.toolBar.on('changeFontItalic',(e) => {
             this.selectCells.forEach(cell => {
                 cell.setFontItalic(e.data)
+            })
+        })
+        this.toolBar.on('changeUnderLine',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setUnderLine(e.data)
             })
         })
     }

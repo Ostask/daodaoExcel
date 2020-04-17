@@ -9,6 +9,7 @@ class ToolBar extends Event{
         this.fontSizeButton = null
         this.fontWeightButton = null
         this.fontItalicButton = null
+        this.underLineButton = null
         this.init(parent)
     }
     init(parent){
@@ -24,6 +25,7 @@ class ToolBar extends Event{
         this.initFontSize()
         this.initFontWeight()
         this.initFontItalic()
+        this.initUnderLine()
     }
     initStyle(){
         const style = document.createElement('style')
@@ -193,6 +195,24 @@ class ToolBar extends Event{
                  }else{
                     this.emit('changeFontItalic',{
                         data:'normal'
+                    })
+                 }
+             },
+             true   
+        )
+    }
+    initUnderLine(){
+        this.underLineButton = this.addButton(
+            '<svg t="1586917547845" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2330" width="16" height="16"><path d="M244.80391196 930.26336805v-53.30830343l534.39217608-4.84906561v53.29783023L244.80391196 930.26336805zM753.79871378 521.41276965q0 273.50615719-248.10878291 273.50615797-237.74037025 0-237.74037027-263.92323078V139.30010844h83.26149514v387.93572969q0 193.57512211 162.33373288 193.5751221 156.94006385 0 156.94006386-187.3331282V139.24774305H753.79871378z" fill="" p-id="2331"></path></svg>',
+            '下划线',
+             (e)=>{
+                 if(e){
+                    this.emit('changeUnderLine',{
+                        data:true
+                    })
+                 }else{
+                    this.emit('changeUnderLine',{
+                        data:false
                     })
                  }
              },

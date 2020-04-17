@@ -80,6 +80,15 @@ class Cell extends zrender.Group{
         this.cell.attr({style:{fontStyle:data}})
         this.data.fontStyle = data
     }
+    //设置文字下划线
+    setUnderLine(data){
+        this.cell.attr({style:{
+            textBoxShadowOffsetY:10,
+            textShadowColor:'#000000',
+            textBoxShadowBlur:10
+        }})
+        console.log(this.cell)
+    }
     //设置单元格data
     setData(data){
         this.data = Object.assign({},this.data,data)
