@@ -54,7 +54,8 @@ class DaoDaoExcel {
             'fontSize':14,
             'fontStyle':'normal',
             'fontWeight':'normal',
-            'underLine':false
+            'textFill':'#000000',
+            'fill':'#ffffff'
         }
         this.init()
     }
@@ -158,6 +159,7 @@ class DaoDaoExcel {
             }
         }
         this.table.on('mousedown',(event) => {
+            console.log(event.target.parent)
             //将工具条的状态改变得和cell的状态一致
             this.toolBar.setConfig(event.target.parent.data)
             if(event.event.button != 0){
@@ -257,7 +259,11 @@ class DaoDaoExcel {
     }
     initEvents(){
         //取消绑定事件
-        document.addEventListener('mouseup',() => {
+        document.addEventListener('mouseup',(e) => {
+            if(e.target != this.edit.editEle){
+                this.edit.hideEdit()
+            }
+
             if(this.handleTableMouseMove){
                 this.table.off('mousemove',this.handleTableMouseMove)
             }
@@ -759,6 +765,9 @@ class DaoDaoExcel {
     }
     initEdit(parent){
         this.edit = new Edit(parent)
+        this.edit.editEle.addEventListener('click',(e) => {
+            stopPropagation(e)
+        })
         this.edit.on('update',(event) => {
             if(event.type == 'text'){
                 this.activeCell.setText(event.text)
@@ -806,16 +815,13 @@ class DaoDaoExcel {
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.xstart && index < this.cells[x][y].data.mergeConfig.xend){
                             this.cells[x][y].data.mergeConfig.xend += 1
-
-                             //如果左右都是row=0,span=0,则被合并
-                            if(x==index+1 && x > 0 && x < this.cells.length - 1){
-                                if(this.cells[x-1][y].data.merge && this.cells[x+1][y].data.merge){
-                                    this.cells[x][y].setData({
-                                        row:0,
-                                        span:0,
-                                        merge:true
-                                    })
-                                }
+                            this.cells[x][y].data.span += 1
+                            for(let m = this.cells[x][y].data.mergeConfig.ystart;m<=this.cells[x][y].data.mergeConfig.yend;m++){
+                                this.cells[index+1][m].setData({
+                                    row:0,
+                                    span:0,
+                                    merge:true
+                                })
                             }
                         } 
                          //如果index在merge之前
@@ -866,15 +872,13 @@ class DaoDaoExcel {
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.ystart && index < this.cells[x][y].data.mergeConfig.yend){
                             this.cells[x][y].data.mergeConfig.yend += 1
-                            //如果左右都是row=0,span=0,则被合并
-                            if(y==index+1 && y > 0 && y < this.cells[x].length - 1){
-                                if(this.cells[x][y-1].data.merge && this.cells[x][y+1].data.merge){
-                                    this.cells[x][y].setData({
-                                        row:0,
-                                        span:0,
-                                        merge:true
-                                    })
-                                }
+                            this.cells[x][y].data.row += 1
+                            for(let m = this.cells[x][y].data.mergeConfig.xstart;m<=this.cells[x][y].data.mergeConfig.xend;m++){
+                                this.cells[m][index + 1].setData({
+                                    row:0,
+                                    span:0,
+                                    merge:true
+                                })
                             }
                         } 
                         //如果index在merge之前
@@ -961,30 +965,163 @@ class DaoDaoExcel {
         //取消合并单元格
         const splitCell = this.contextMenu.addButton('取消合并单元格',() => {
             //遍历一遍当前合并的单元格，重新设置他们的位置以及大小
-            let xstart = this.activeCell.data.mergeConfig.xstart
-            let ystart = this.activeCell.data.mergeConfig.ystart
-            let xend = this.activeCell.data.mergeConfig.xend
-            let yend = this.activeCell.data.mergeConfig.yend
-
-            this.selectCells = []
+            let xstart = this.selectCells[0].data.x
+            let ystart = this.selectCells[0].data.y
+            let xend = this.selectCells[this.selectCells.length - 1].data.x
+            let yend = this.selectCells[this.selectCells.length - 1].data.y
 
             for(let x = xstart;x<=xend;x++){
                 for(let y=ystart;y<=yend;y++){
-                    this.cells[x][y].setData({
-                        xPlace:this.tableHeaderCell[x].data.xPlace,
-                        yPlace:this.tableIndexCell[y].data.yPlace,
-                        cellWidth:this.tableHeaderCell[x].data.width,
-                        cellHeight:this.tableIndexCell[y].data.height,
-                        merge:false,
-                        row:1,
-                        span:1,
-                        mergeConfig:null
-                    })
-                    this.cells[x][y].show()
-                    this.selectCells.push(this.cells[x][y])
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 && this.cells[x][y].data.span > 1){
+                        let x0 = this.cells[x][y].data.mergeConfig.xstart
+                        let y0 = this.cells[x][y].data.mergeConfig.ystart
+                        let x1 = this.cells[x][y].data.mergeConfig.xend
+                        let y1 = this.cells[x][y].data.mergeConfig.yend
+                        for(let i = x0;i<=x1;i++){
+                            for(let j=y0;j<=y1;j++){
+                                this.cells[i][j].setData({
+                                    xPlace:this.tableHeaderCell[i].data.xPlace,
+                                    yPlace:this.tableIndexCell[j].data.yPlace,
+                                    cellWidth:this.tableHeaderCell[i].data.width,
+                                    cellHeight:this.tableIndexCell[j].data.height,
+                                    merge:false,
+                                    row:1,
+                                    span:1,
+                                    mergeConfig:null
+                                })
+                                this.cells[i][j].show()
+                                this.selectCells.push(this.cells[i][j])
+                            }
+                        }
+                    }
                 }
             }
             this.selectedCell.change(this.selectCells)
+        })
+
+        //删除列
+        const deleteSpan = this.contextMenu.addButton('删除列',() => {
+            //先把列删掉
+            const index = this.activeCell.data.x
+            for(let y = 0;y<this.cells[index].length;y++){
+                this.table.remove(this.cells[index][y])
+            }
+
+            //更新所有cells的xy
+            for(let x = 0;x<this.cells.length;x++){
+                for(let y=0;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                    //如果这个单元格是合并的单元格
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                        //如果index在merge的单元格之中
+                        if(index >= this.cells[x][y].data.mergeConfig.xstart && index <= this.cells[x][y].data.mergeConfig.xend){
+                            this.cells[x][y].data.mergeConfig.xend -= 1
+                            this.cells[x][y].data.span -= 1
+                            //如果被删掉的刚好是合并的，那就设置相邻的单元格顶替
+                            if(index == this.cells[x][y].data.mergeConfig.xstart || index == this.cells[x][y].data.mergeConfig.xend){
+                                this.cells[this.cells[x][y].data.mergeConfig.xstart + 1][y].setData({
+                                    row:this.cells[x][y].data.row,
+                                    span:this.cells[x][y].data.span,
+                                    mergeConfig:{
+                                        xstart:this.cells[x][y].data.mergeConfig.xstart,
+                                        xend:this.cells[x][y].data.mergeConfig.xend,
+                                        ystart:this.cells[x][y].data.mergeConfig.ystart,
+                                        yend:this.cells[x][y].data.mergeConfig.yend,
+                                    }
+                                })
+                                x++
+                            }
+                        } 
+                         //如果index在merge之前
+                         if(index < this.cells[x][y].data.mergeConfig.xstart){
+                            this.cells[x][y].data.mergeConfig.xstart -= 1
+                            this.cells[x][y].data.mergeConfig.xend -= 1
+                        }
+                    }
+                }
+            }
+
+            this.cells.splice(index,1)
+            //更新所有cells的xy
+            for(let x = 0;x<this.cells.length;x++){
+                for(let y=0;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                }
+            }
+            //再删头部
+            this.tableHeader.remove(this.tableHeaderCell[index])
+            this.tableHeaderCell.splice(index,1)
+            //更新所有tableHeaderCell的data和位置
+             for(let i = index;i<this.tableHeaderCell.length;i++){
+                this.tableHeaderCell[i].setData({index:i})
+            }
+
+            //更新整个视图
+            this.refreshCell()
+        })
+
+        //删除行
+        const deleteRow = this.contextMenu.addButton('删除行',() => {
+            //先把行删掉
+            const index = this.activeCell.data.y
+            for(let x = 0;x<this.cells.length;x++){
+                this.table.remove(this.cells[x][index])
+            }
+
+            //更新所有cells的xy
+            for(let x = 0;x<this.cells.length;x++){
+                for(let y=0;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                    //如果这个单元格是合并的单元格
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                        //如果index在merge的单元格之中
+                        if(index >= this.cells[x][y].data.mergeConfig.ystart && index <= this.cells[x][y].data.mergeConfig.yend){
+                            this.cells[x][y].data.mergeConfig.yend -= 1
+                            this.cells[x][y].data.row -= 1
+                            //如果被删掉的刚好是合并的，那就设置相邻的单元格顶替
+                            if(index == this.cells[x][y].data.mergeConfig.ystart || index == this.cells[x][y].data.mergeConfig.yend){
+                                this.cells[x][this.cells[x][y].data.mergeConfig.ystart + 1].setData({
+                                    row:this.cells[x][y].data.row,
+                                    span:this.cells[x][y].data.span,
+                                    mergeConfig:{
+                                        xstart:this.cells[x][y].data.mergeConfig.xstart,
+                                        xend:this.cells[x][y].data.mergeConfig.xend,
+                                        ystart:this.cells[x][y].data.mergeConfig.ystart,
+                                        yend:this.cells[x][y].data.mergeConfig.yend,
+                                    }
+                                })
+                                y++
+                            }
+                        } 
+                         //如果index在merge之前
+                         if(index < this.cells[x][y].data.mergeConfig.ystart){
+                            this.cells[x][y].data.mergeConfig.ystart -= 1
+                            this.cells[x][y].data.mergeConfig.yend -= 1
+                        }
+                    }
+                }
+            }
+
+            for(let x = 0;x<this.cells.length;x++){
+                this.cells[x].splice(index,1)
+            }
+            
+            //更新所有cells的xy
+            for(let x = 0;x<this.cells.length;x++){
+                for(let y=0;y<this.cells[x].length;y++){
+                    this.cells[x][y].setData({x:x,y:y})
+                }
+            }
+            //再删头部
+            this.tableIndex.remove(this.tableIndexCell[index])
+            this.tableIndexCell.splice(index,1)
+            //更新所有tableHeaderCell的data和位置
+             for(let i = index;i<this.tableIndexCell.length;i++){
+                this.tableIndexCell[i].setData({index:i})
+            }
+
+            //更新整个视图
+            this.refreshCell()
         })
 
         //右键菜单
@@ -1061,7 +1198,7 @@ class DaoDaoExcel {
         console.log(this.cells)
     }
     refreshTableHeaderCell(){
-        let x = this.tableHeaderCell[0].data.xPlace
+        let x = indexWidth
         this.tableHeaderCell.forEach(cell => {
             cell.setData({
                 xPlace:x
@@ -1071,7 +1208,7 @@ class DaoDaoExcel {
         })
     }
     refreshTableIndexCell(){
-        let y = this.tableIndexCell[0].data.yPlace
+        let y = headerHeight
         this.tableIndexCell.forEach(cell => {
             cell.setData({
                 yPlace:y
@@ -1162,9 +1299,14 @@ class DaoDaoExcel {
                 cell.setFontItalic(e.data)
             })
         })
-        this.toolBar.on('changeUnderLine',(e) => {
+        this.toolBar.on('changeTextFill',(e) => {
             this.selectCells.forEach(cell => {
-                cell.setUnderLine(e.data)
+                cell.setTextFill(e.data)
+            })
+        })
+        this.toolBar.on('changeFill',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setFill(e.data)
             })
         })
     }

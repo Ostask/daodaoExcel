@@ -10,6 +10,8 @@ class ToolBar extends Event{
         this.fontWeightButton = null
         this.fontItalicButton = null
         this.underLineButton = null
+        this.textFillButton = null
+        this.fillButton = null
         this.init(parent)
     }
     init(parent){
@@ -25,7 +27,8 @@ class ToolBar extends Event{
         this.initFontSize()
         this.initFontWeight()
         this.initFontItalic()
-        this.initUnderLine()
+        this.initTextFill()
+        this.initFill()
     }
     initStyle(){
         const style = document.createElement('style')
@@ -144,7 +147,7 @@ class ToolBar extends Event{
                 <option value="18">18</option>
                 <option value="20">20</option>
                 <option value="24">24</option>
-                <option value="30">20</option>
+                <option value="30">30</option>
                 <option value="36">36</option>
             </select>
             <div class="tooltip__down">
@@ -201,23 +204,251 @@ class ToolBar extends Event{
              true   
         )
     }
-    initUnderLine(){
-        this.underLineButton = this.addButton(
-            '<svg t="1586917547845" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2330" width="16" height="16"><path d="M244.80391196 930.26336805v-53.30830343l534.39217608-4.84906561v53.29783023L244.80391196 930.26336805zM753.79871378 521.41276965q0 273.50615719-248.10878291 273.50615797-237.74037025 0-237.74037027-263.92323078V139.30010844h83.26149514v387.93572969q0 193.57512211 162.33373288 193.5751221 156.94006385 0 156.94006386-187.3331282V139.24774305H753.79871378z" fill="" p-id="2331"></path></svg>',
-            '下划线',
-             (e)=>{
-                 if(e){
-                    this.emit('changeUnderLine',{
-                        data:true
-                    })
-                 }else{
-                    this.emit('changeUnderLine',{
-                        data:false
-                    })
-                 }
-             },
-             true   
-        )
+    initTextFill(){
+        const id = generateUUID()
+        const id1 = generateUUID()
+        const id2 = generateUUID()
+        const html = `
+            <div class="toolbar-icon" id="${id1}">
+                <svg style="margin-top: 2px;vertical-align: top" t="1586918593118" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4607" width="12" height="12"><path d="M792.864 922.112l103.584-2.176L572.576 110.24h-89.184L161.696 919.936H264l66.944-167.936h394.112l67.808 170.112zM369.216 656L528 257.632 686.784 656h-317.568z" p-id="4608"></path></svg>
+                <div class="color-line" style="width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-6px;border:1px solid #aaa"></div>
+            </div>
+            <div class="tooltip__down">
+                文字颜色
+            </div>
+            <div class="dropdown-icon">
+                <svg id="${id2}" style="height:16px;" t="1586922548084" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5368" width="8" height="8"><path d="M958.009 307.2c0-9.317-3.554-18.636-10.663-25.746-14.219-14.218-37.273-14.218-51.491 0l-383.854 383.856-383.854-383.856c-14.219-14.218-37.271-14.218-51.49 0-14.219 14.22-14.219 37.271 0 51.491l409.6 409.6c14.219 14.218 37.271 14.218 51.49 0l409.6-409.6c7.109-7.11 10.663-16.429 10.663-25.746z" p-id="5369"></path></svg>
+                <div class="dropdown-card" id="${id}">
+                    <div class="color-button" data-color="#ffffff" style="background-color:#ffffff"></div>
+                    <div class="color-button" data-color="#0d0015" style="background-color:#0d0015"></div>
+                    <div class="color-button" data-color="#fe2c23" style="background-color:#fe2c23"></div>
+                    <div class="color-button" data-color="#ff9900" style="background-color:#ff9900"></div>
+                    <div class="color-button" data-color="#ffd900" style="background-color:#ffd900"></div>
+                    <div class="color-button" data-color="#a3e043" style="background-color:#a3e043"></div>
+                    <div class="color-button" data-color="#37d9f0" style="background-color:#37d9f0"></div>
+                    <div class="color-button" data-color="#4da8ee" style="background-color:#4da8ee"></div>
+                    <div class="color-button" data-color="#956FE7" style="background-color:#956FE7"></div>
+
+                    <div class="color-button" data-color="#F3F3F4" style="background-color:#F3F3F4"></div>
+                    <div class="color-button" data-color="#CCCCCC" style="background-color:#CCCCCC"></div>
+                    <div class="color-button" data-color="#FEF2F0" style="background-color:#FEF2F0"></div>
+                    <div class="color-button" data-color="#FEF5E7" style="background-color:#FEF5E7"></div>
+                    <div class="color-button" data-color="#FEFCD9" style="background-color:#FEFCD9"></div>
+                    <div class="color-button" data-color="#EDF6E8" style="background-color:#EDF6E8"></div>
+                    <div class="color-button" data-color="#E6FAFA" style="background-color:#E6FAFA"></div>
+                    <div class="color-button" data-color="#EBF4FC" style="background-color:#EBF4FC"></div>
+                    <div class="color-button" data-color="#F0EDF6" style="background-color:#F0EDF6"></div>
+
+                    <div class="color-button" data-color="#D7D8D9" style="background-color:#D7D8D9"></div>
+                    <div class="color-button" data-color="#A5A5A5" style="background-color:#A5A5A5"></div>
+                    <div class="color-button" data-color="#FBD4D0" style="background-color:#FBD4D0"></div>
+                    <div class="color-button" data-color="#FFD7B9" style="background-color:#FFD7B9"></div>
+                    <div class="color-button" data-color="#F9EDA6" style="background-color:#F9EDA6"></div>
+                    <div class="color-button" data-color="#d4e9d6" style="background-color:#d4e9d6"></div>
+                    <div class="color-button" data-color="#C7E6EA" style="background-color:#C7E6EA"></div>
+                    <div class="color-button" data-color="#CCE0F1" style="background-color:#CCE0F1"></div>
+                    <div class="color-button" data-color="#DAD5E9" style="background-color:#DAD5E9"></div>
+
+                    <div class="color-button" data-color="#7B7F83" style="background-color:#7B7F83"></div>
+                    <div class="color-button" data-color="#494949" style="background-color:#494949"></div>
+                    <div class="color-button" data-color="#EE7976" style="background-color:#EE7976"></div>
+                    <div class="color-button" data-color="#FAA573" style="background-color:#FAA573"></div>
+                    <div class="color-button" data-color="#e6b322" style="background-color:#e6b322"></div>
+                    <div class="color-button" data-color="#98C091" style="background-color:#98C091"></div>
+                    <div class="color-button" data-color="#79C6CD" style="background-color:#79C6CD"></div>
+                    <div class="color-button" data-color="#6EAAD7" style="background-color:#6EAAD7"></div>
+                    <div class="color-button" data-color="#9C8EC1" style="background-color:#9C8EC1"></div>
+
+                    <div class="color-button" data-color="#41464B" style="background-color:#41464B"></div>
+                    <div class="color-button" data-color="#333333" style="background-color:#333333"></div>
+                    <div class="color-button" data-color="#BE1A1D" style="background-color:#BE1A1D"></div>
+                    <div class="color-button" data-color="#B95514" style="background-color:#B95514"></div>
+                    <div class="color-button" data-color="#AD720E" style="background-color:#AD720E"></div>
+                    <div class="color-button" data-color="#1C7231" style="background-color:#1C7231"></div>
+                    <div class="color-button" data-color="#1C7892" style="background-color:#1C7892"></div>
+                    <div class="color-button" data-color="#19439C" style="background-color:#19439C"></div>
+                    <div class="color-button" data-color="#511B78" style="background-color:#511B78"></div>
+                </div>
+            </div>
+        `
+        let div = document.createElement('div')
+        div.classList.add("toolbar-item","toolbar-drop-down","toolbar-color")
+        div.innerHTML = html
+
+        const style = document.createElement('style')
+        style.innerHTML = `
+            #daodao_excel_scroll_toolbar-wrapper .dropdown-icon{
+                height:20px;
+                display: inline-block;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-icon{
+                height:20px;
+                display: inline-block;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-color .dropdown-icon .dropdown-card{
+                display: none;
+                position:absolute;
+                left:50%;
+                margin-left:-110px;
+                width:220px;
+                line-height: 22px;
+                font-size:12px;
+                border:1px solid #d0d0d0;
+                background: #fff;
+                text-align: center;
+                z-index:10;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-color .dropdown-icon .dropdown-card:before{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #d0d0d0;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-8px;
+                left:50%;
+                margin-left:-5px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-color .dropdown-icon .dropdown-card:after{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #ffffff;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-6px;
+                left:50%;
+                margin-left:-5px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-color .dropdown-card .color-button{
+                width:20px;
+                height:20px;
+                float:left;
+                margin:4px 2px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-color .dropdown-card .color-button:hover{
+                box-shadow:0 0 7px 2px #d0d0d0;
+            }
+    
+        `
+        this.el.appendChild(style)
+
+        this.el.appendChild(div)
+
+        this.textFillButton = document.getElementById(id1)
+
+        document.getElementById(id2).addEventListener('click',(event) => {
+            stopPropagation(event)
+            document.getElementById(id).style.display = 'block'
+        })
+
+        document.addEventListener('click',() => {
+            document.getElementById(id).style.display = 'none'
+        })
+        
+        document.getElementById(id).addEventListener('click',(e) => {
+            let color = e.target.dataset.color
+            document.getElementById(id).style.display = 'none'
+            this.emit('changeTextFill',{
+                data:color
+            })
+            this.textFillButton.querySelector(".color-line").style.backgroundColor = color
+        })
+    }
+    initFill(){
+        const id = generateUUID()
+        const id1 = generateUUID()
+        const id2 = generateUUID()
+        const html = `
+            <div class="toolbar-icon" id="${id1}">
+                <svg t="1586930965024" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5660" width="16" height="16"><path d="M896 384c-46.72-46.72-160.64-25.6-219.52-10.24L448.64 152.96l-21.76 21.76L313.6 65.28 223.36 152.96 336.64 262.4 66.56 524.16v2.56L448.64 896l359.68-349.44L960 693.12S960 448 896 384zM194.56 524.16l255.36-247.68 254.72 247.68H194.56z" p-id="5661"></path></svg>
+                <div class="color-line" style="width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-6px;border:1px solid #aaa;"></div>
+            </div>
+            <div class="tooltip__down">
+                背景颜色
+            </div>
+            <div class="dropdown-icon">
+                <svg id="${id2}" style="height:16px;" t="1586922548084" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5368" width="8" height="8"><path d="M958.009 307.2c0-9.317-3.554-18.636-10.663-25.746-14.219-14.218-37.273-14.218-51.491 0l-383.854 383.856-383.854-383.856c-14.219-14.218-37.271-14.218-51.49 0-14.219 14.22-14.219 37.271 0 51.491l409.6 409.6c14.219 14.218 37.271 14.218 51.49 0l409.6-409.6c7.109-7.11 10.663-16.429 10.663-25.746z" p-id="5369"></path></svg>
+                <div class="dropdown-card" id="${id}">
+                    <div class="color-button" data-color="#ffffff" style="background-color:#ffffff"></div>
+                    <div class="color-button" data-color="#0d0015" style="background-color:#0d0015"></div>
+                    <div class="color-button" data-color="#fe2c23" style="background-color:#fe2c23"></div>
+                    <div class="color-button" data-color="#ff9900" style="background-color:#ff9900"></div>
+                    <div class="color-button" data-color="#ffd900" style="background-color:#ffd900"></div>
+                    <div class="color-button" data-color="#a3e043" style="background-color:#a3e043"></div>
+                    <div class="color-button" data-color="#37d9f0" style="background-color:#37d9f0"></div>
+                    <div class="color-button" data-color="#4da8ee" style="background-color:#4da8ee"></div>
+                    <div class="color-button" data-color="#956FE7" style="background-color:#956FE7"></div>
+
+                    <div class="color-button" data-color="#F3F3F4" style="background-color:#F3F3F4"></div>
+                    <div class="color-button" data-color="#CCCCCC" style="background-color:#CCCCCC"></div>
+                    <div class="color-button" data-color="#FEF2F0" style="background-color:#FEF2F0"></div>
+                    <div class="color-button" data-color="#FEF5E7" style="background-color:#FEF5E7"></div>
+                    <div class="color-button" data-color="#FEFCD9" style="background-color:#FEFCD9"></div>
+                    <div class="color-button" data-color="#EDF6E8" style="background-color:#EDF6E8"></div>
+                    <div class="color-button" data-color="#E6FAFA" style="background-color:#E6FAFA"></div>
+                    <div class="color-button" data-color="#EBF4FC" style="background-color:#EBF4FC"></div>
+                    <div class="color-button" data-color="#F0EDF6" style="background-color:#F0EDF6"></div>
+
+                    <div class="color-button" data-color="#D7D8D9" style="background-color:#D7D8D9"></div>
+                    <div class="color-button" data-color="#A5A5A5" style="background-color:#A5A5A5"></div>
+                    <div class="color-button" data-color="#FBD4D0" style="background-color:#FBD4D0"></div>
+                    <div class="color-button" data-color="#FFD7B9" style="background-color:#FFD7B9"></div>
+                    <div class="color-button" data-color="#F9EDA6" style="background-color:#F9EDA6"></div>
+                    <div class="color-button" data-color="#d4e9d6" style="background-color:#d4e9d6"></div>
+                    <div class="color-button" data-color="#C7E6EA" style="background-color:#C7E6EA"></div>
+                    <div class="color-button" data-color="#CCE0F1" style="background-color:#CCE0F1"></div>
+                    <div class="color-button" data-color="#DAD5E9" style="background-color:#DAD5E9"></div>
+
+                    <div class="color-button" data-color="#7B7F83" style="background-color:#7B7F83"></div>
+                    <div class="color-button" data-color="#494949" style="background-color:#494949"></div>
+                    <div class="color-button" data-color="#EE7976" style="background-color:#EE7976"></div>
+                    <div class="color-button" data-color="#FAA573" style="background-color:#FAA573"></div>
+                    <div class="color-button" data-color="#e6b322" style="background-color:#e6b322"></div>
+                    <div class="color-button" data-color="#98C091" style="background-color:#98C091"></div>
+                    <div class="color-button" data-color="#79C6CD" style="background-color:#79C6CD"></div>
+                    <div class="color-button" data-color="#6EAAD7" style="background-color:#6EAAD7"></div>
+                    <div class="color-button" data-color="#9C8EC1" style="background-color:#9C8EC1"></div>
+
+                    <div class="color-button" data-color="#41464B" style="background-color:#41464B"></div>
+                    <div class="color-button" data-color="#333333" style="background-color:#333333"></div>
+                    <div class="color-button" data-color="#BE1A1D" style="background-color:#BE1A1D"></div>
+                    <div class="color-button" data-color="#B95514" style="background-color:#B95514"></div>
+                    <div class="color-button" data-color="#AD720E" style="background-color:#AD720E"></div>
+                    <div class="color-button" data-color="#1C7231" style="background-color:#1C7231"></div>
+                    <div class="color-button" data-color="#1C7892" style="background-color:#1C7892"></div>
+                    <div class="color-button" data-color="#19439C" style="background-color:#19439C"></div>
+                    <div class="color-button" data-color="#511B78" style="background-color:#511B78"></div>
+                </div>
+            </div>
+        `
+        let div = document.createElement('div')
+        div.classList.add("toolbar-item","toolbar-drop-down","toolbar-color")
+        div.innerHTML = html
+
+        this.el.appendChild(div)
+
+        this.fillButton = document.getElementById(id1)
+
+        document.getElementById(id2).addEventListener('click',(event) => {
+            stopPropagation(event)
+            document.getElementById(id).style.display = 'block'
+        })
+
+        document.addEventListener('click',() => {
+            document.getElementById(id).style.display = 'none'
+        })
+        
+        document.getElementById(id).addEventListener('click',(e) => {
+            let color = e.target.dataset.color
+            document.getElementById(id).style.display = 'none'
+            this.emit('changeFill',{
+                data:color
+            })
+            this.fillButton.querySelector(".color-line").style.backgroundColor = color
+        })
     }
     addButton(innerHTML,tip,func,hasStatus){
         let dom = document.createElement('div')
@@ -248,6 +479,8 @@ class ToolBar extends Event{
     setConfig(config){
         this.typeFaceButton.value = config.fontFamily
         this.fontSizeButton.value = config.fontSize
+        this.textFillButton.querySelector(".color-line").style.backgroundColor = config.textFill
+        this.fillButton.querySelector(".color-line").style.backgroundColor = config.fill
         if(config.fontWeight == 'bold'){
             this.fontWeightButton.classList.add('active')
         }else{

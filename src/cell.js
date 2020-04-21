@@ -25,7 +25,9 @@ class Cell extends zrender.Group{
                 fontSize:data.fontSize,
                 fontFamily:data.fontFamily,
                 fontWeight:data.fontWeight,
-                fontStyle:data.fontStyle
+                fontStyle:data.fontStyle,
+                textFill:data.textFill,
+                fill:data.fill
             }
         }
         let finnalconfig = Object.assign({},defaultCellConfig,config,countConfig)
@@ -49,11 +51,15 @@ class Cell extends zrender.Group{
     }
     //设置选中单元格样式
     selectCell(){
-        this.cell.attr({style:{fill:'rgba(1,136,251,0.1)'}})
+        let color = 'rgba(1,136,251,0.1)'
+        let datafill = this.data.fill
+        let newColor = zrender.color.lerp(0.8, [color,datafill],true)
+        
+        this.cell.attr({style:{fill:newColor.color}})
     }
     //取消选择样式重置
     unSelectCell(){
-        this.cell.attr({style:{fill:'#fff'}})
+        this.cell.attr({style:{fill:this.data.fill}})
     }
     //设置单元格文字
     setText(text){
@@ -80,14 +86,15 @@ class Cell extends zrender.Group{
         this.cell.attr({style:{fontStyle:data}})
         this.data.fontStyle = data
     }
-    //设置文字下划线
-    setUnderLine(data){
-        this.cell.attr({style:{
-            textBoxShadowOffsetY:10,
-            textShadowColor:'#000000',
-            textBoxShadowBlur:10
-        }})
-        console.log(this.cell)
+    //设置字体颜色
+    setTextFill(data){
+        this.cell.attr({style:{textFill:data}})
+        this.data.textFill = data
+    }
+    //设置背景颜色
+    setFill(data){
+        this.cell.attr({style:{fill:data}})
+        this.data.fill = data
     }
     //设置单元格data
     setData(data){
