@@ -55,7 +55,9 @@ class DaoDaoExcel {
             'fontStyle':'normal',
             'fontWeight':'normal',
             'textFill':'#000000',
-            'fill':'#ffffff'
+            'fill':'#ffffff',
+            'border':false,
+            'textAlign':'center'
         }
         this.init()
     }
@@ -906,97 +908,12 @@ class DaoDaoExcel {
 
         //合并单元格
         const mergeCells = this.contextMenu.addButton('合并单元格',()=>{
-            //设置activeCell的row和span
-            //求最小下标以及最大下标
-            let xstart = this.selectCells[0].data.x
-            let ystart = this.selectCells[0].data.y
-            let xPlace = this.selectCells[0].data.xPlace
-            let yPlace = this.selectCells[0].data.yPlace
-            let xend = this.selectCells[this.selectCells.length - 1].data.x
-            let yend = this.selectCells[this.selectCells.length - 1].data.y
-            
-            let row = yend - ystart + 1
-            let span = xend - xstart + 1
-
-            let width = 0
-            let height = 0
-
-            for(let i = xstart;i<=xend;i++){
-                width += this.tableHeaderCell[i].data.width
-            }
-
-            for(let i = ystart;i<=yend;i++){
-                height += this.tableIndexCell[i].data.height
-            }
-
-            this.activeCell.setData({
-                row:row,
-                span:span,
-                merge:true,
-                cellWidth:width,
-                cellHeight:height,
-                xPlace:xPlace,
-                yPlace:yPlace,
-                mergeConfig:{
-                    xstart:xstart,
-                    ystart:ystart,
-                    xend:xend,
-                    yend:yend
-                }
-            })
-
-            console.log(this.activeCell)
-        
-            //其余的selectCells全部隐藏不显示，被merge
-            this.selectCells.forEach(cell => {
-                if(cell != this.activeCell){
-                    cell.setData({
-                        row:0,
-                        span:0,
-                        merge:true,
-                    })
-                }
-            })
-
-            //重新设置activeCell和selectCells
-            this.selectCells = [this.activeCell]
+           this.mergeCells()
         })
 
         //取消合并单元格
         const splitCell = this.contextMenu.addButton('取消合并单元格',() => {
-            //遍历一遍当前合并的单元格，重新设置他们的位置以及大小
-            let xstart = this.selectCells[0].data.x
-            let ystart = this.selectCells[0].data.y
-            let xend = this.selectCells[this.selectCells.length - 1].data.x
-            let yend = this.selectCells[this.selectCells.length - 1].data.y
-
-            for(let x = xstart;x<=xend;x++){
-                for(let y=ystart;y<=yend;y++){
-                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 && this.cells[x][y].data.span > 1){
-                        let x0 = this.cells[x][y].data.mergeConfig.xstart
-                        let y0 = this.cells[x][y].data.mergeConfig.ystart
-                        let x1 = this.cells[x][y].data.mergeConfig.xend
-                        let y1 = this.cells[x][y].data.mergeConfig.yend
-                        for(let i = x0;i<=x1;i++){
-                            for(let j=y0;j<=y1;j++){
-                                this.cells[i][j].setData({
-                                    xPlace:this.tableHeaderCell[i].data.xPlace,
-                                    yPlace:this.tableIndexCell[j].data.yPlace,
-                                    cellWidth:this.tableHeaderCell[i].data.width,
-                                    cellHeight:this.tableIndexCell[j].data.height,
-                                    merge:false,
-                                    row:1,
-                                    span:1,
-                                    mergeConfig:null
-                                })
-                                this.cells[i][j].show()
-                                this.selectCells.push(this.cells[i][j])
-                            }
-                        }
-                    }
-                }
-            }
-            this.selectedCell.change(this.selectCells)
+            this.splitCell()
         })
 
         //删除列
@@ -1276,6 +1193,102 @@ class DaoDaoExcel {
         }
         this.scroll.refresh(data)
     }
+    mergeCells(){
+        if(this.selectCells.every(cell => {return cell.data.merge == false})){
+            
+        }else{
+            return false
+        }
+        //设置activeCell的row和span
+        //求最小下标以及最大下标
+        let xstart = this.selectCells[0].data.x
+        let ystart = this.selectCells[0].data.y
+        let xPlace = this.selectCells[0].data.xPlace
+        let yPlace = this.selectCells[0].data.yPlace
+        let xend = this.selectCells[this.selectCells.length - 1].data.x
+        let yend = this.selectCells[this.selectCells.length - 1].data.y
+        
+        let row = yend - ystart + 1
+        let span = xend - xstart + 1
+
+        let width = 0
+        let height = 0
+
+        for(let i = xstart;i<=xend;i++){
+            width += this.tableHeaderCell[i].data.width
+        }
+
+        for(let i = ystart;i<=yend;i++){
+            height += this.tableIndexCell[i].data.height
+        }
+
+        this.activeCell.setData({
+            row:row,
+            span:span,
+            merge:true,
+            cellWidth:width,
+            cellHeight:height,
+            xPlace:xPlace,
+            yPlace:yPlace,
+            mergeConfig:{
+                xstart:xstart,
+                ystart:ystart,
+                xend:xend,
+                yend:yend
+            }
+        })
+
+        console.log(this.activeCell)
+    
+        //其余的selectCells全部隐藏不显示，被merge
+        this.selectCells.forEach(cell => {
+            if(cell != this.activeCell){
+                cell.setData({
+                    row:0,
+                    span:0,
+                    merge:true,
+                })
+            }
+        })
+
+        //重新设置activeCell和selectCells
+        this.selectCells = [this.activeCell]
+    }
+    splitCell(){
+        //遍历一遍当前合并的单元格，重新设置他们的位置以及大小
+        let xstart = this.selectCells[0].data.x
+        let ystart = this.selectCells[0].data.y
+        let xend = this.selectCells[this.selectCells.length - 1].data.x
+        let yend = this.selectCells[this.selectCells.length - 1].data.y
+
+        for(let x = xstart;x<=xend;x++){
+            for(let y=ystart;y<=yend;y++){
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 && this.cells[x][y].data.span > 1){
+                    let x0 = this.cells[x][y].data.mergeConfig.xstart
+                    let y0 = this.cells[x][y].data.mergeConfig.ystart
+                    let x1 = this.cells[x][y].data.mergeConfig.xend
+                    let y1 = this.cells[x][y].data.mergeConfig.yend
+                    for(let i = x0;i<=x1;i++){
+                        for(let j=y0;j<=y1;j++){
+                            this.cells[i][j].setData({
+                                xPlace:this.tableHeaderCell[i].data.xPlace,
+                                yPlace:this.tableIndexCell[j].data.yPlace,
+                                cellWidth:this.tableHeaderCell[i].data.width,
+                                cellHeight:this.tableIndexCell[j].data.height,
+                                merge:false,
+                                row:1,
+                                span:1,
+                                mergeConfig:null
+                            })
+                            this.cells[i][j].show()
+                            this.selectCells.push(this.cells[i][j])
+                        }
+                    }
+                }
+            }
+        }
+        this.selectedCell.change(this.selectCells)
+    }
     initToolBar(parent){
         this.toolBar = new ToolBar(parent)
         this.toolBar.on('changeTypeFace',(e) => {
@@ -1308,6 +1321,25 @@ class DaoDaoExcel {
             this.selectCells.forEach(cell => {
                 cell.setFill(e.data)
             })
+        })
+        this.toolBar.on('changeBorder',(e) =>{
+            this.selectCells.forEach(cell => {
+                cell.setBorder(e.data)
+            })
+        })
+        this.toolBar.on('changeTextAlign',(e) => {
+            this.selectCells.forEach(cell => {
+                cell.setTextAlign(e.data)
+            })
+        })
+        this.toolBar.on('mergeCell',(e) => {
+            this.mergeCells()
+        })
+        this.toolBar.on('splitCell',(e) => {
+            this.splitCell()
+        })
+        this.toolBar.on('addImage',(e) => {
+            this.uploadFile.open()
         })
     }
 }

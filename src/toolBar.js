@@ -5,6 +5,7 @@ class ToolBar extends Event{
     constructor(parent){
         super()
         this.el = null
+        this.parent = parent
         this.typeFaceButton = null
         this.fontSizeButton = null
         this.fontWeightButton = null
@@ -12,6 +13,13 @@ class ToolBar extends Event{
         this.underLineButton = null
         this.textFillButton = null
         this.fillButton = null
+        this.borderButton = null
+        this.alignLiftButton = null
+        this.alignRightButton = null
+        this.alignCenterButton = null
+        this.mergeCellButton = null
+        this.splitCellButton = null
+        this.addImageButton = null
         this.init(parent)
     }
     init(parent){
@@ -29,6 +37,13 @@ class ToolBar extends Event{
         this.initFontItalic()
         this.initTextFill()
         this.initFill()
+        this.initBorder()
+        this.initAlignLeft()
+        this.initAlignRight()
+        this.initAlignCenter()
+        this.initMergeCell()
+        this.initSplitCell()
+        this.initAddImage()
     }
     initStyle(){
         const style = document.createElement('style')
@@ -39,6 +54,7 @@ class ToolBar extends Event{
                 border:1px solid transparent;
                 vertical-align: middle;
                 cursor: pointer;
+                margin-right:4px;
             }
             #daodao_excel_scroll_toolbar-wrapper .toolbar-item .tooltip__down{
                 display:none;
@@ -344,7 +360,7 @@ class ToolBar extends Event{
             document.getElementById(id).style.display = 'block'
         })
 
-        document.addEventListener('click',() => {
+        parent.addEventListener('click',() => {
             document.getElementById(id).style.display = 'none'
         })
         
@@ -437,7 +453,7 @@ class ToolBar extends Event{
             document.getElementById(id).style.display = 'block'
         })
 
-        document.addEventListener('click',() => {
+        parent.addEventListener('click',() => {
             document.getElementById(id).style.display = 'none'
         })
         
@@ -449,6 +465,209 @@ class ToolBar extends Event{
             })
             this.fillButton.querySelector(".color-line").style.backgroundColor = color
         })
+    }
+    initBorder(){
+        const id = generateUUID()
+        const id1 = generateUUID()
+        const id2 = generateUUID()
+        const html = `
+            <svg t="1586932073278" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6515" width="16" height="16"><path d="M0 0h1024v1024H0z" fill="#F6F7F8" p-id="6516"></path><path d="M0 1024V0h1024v1024H0zM916.210526 107.789474H107.789474v808.421052h808.421052V107.789474z" fill="#484D55" p-id="6517"></path><path d="M970.105263 538.947368h-431.157895v431.157895H485.052632v-431.157895H53.894737V485.052632h431.157895V53.894737h53.894736v431.157895h431.157895v53.894736z" fill="#484D55" p-id="6518"></path></svg>
+            <div class="dropdown-card">
+                <div class="border-button tip-wrapper" id='${id1}' data-type="false">
+                    <svg t="1586932168001" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6672" width="16" height="16"><path d="M0 0h1024v1024H0z" fill="#F6F7F8" p-id="6673"></path><path d="M0 1024V0h1024v1024H0zM916.210526 107.789474H107.789474v808.421052h808.421052V107.789474z" fill="#C9C9CF" p-id="6674"></path><path d="M970.105263 538.947368h-431.157895v431.157895H485.052632v-431.157895H53.894737V485.052632h431.157895V53.894737h53.894736v431.157895h431.157895v53.894736z" fill="#C9C9CF" p-id="6675"></path></svg>
+                    <div class="tip">
+                        无边框
+                    </div>
+                </div>
+                <div class="border-button tip-wrapper" id='${id2}' data-type="true">
+                    <svg t="1586933085310" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7113" width="16" height="16"><path d="M0 0h1024v1024H0z" fill="#F6F7F8" p-id="7114"></path><path d="M0 1024V0h1024v1024H0zM916.210526 107.789474H107.789474v808.421052h808.421052V107.789474z" fill="#484D55" p-id="7115"></path><path d="M970.105263 538.947368h-431.157895v431.157895H485.052632v-431.157895H53.894737V485.052632h431.157895V53.894737h53.894736v431.157895h431.157895v53.894736z" fill="#484D55" p-id="7116"></path></svg>                    
+                    <div class="tip">
+                        所有边框
+                    </div>
+                </div>
+            </div>
+        `
+        const style = document.createElement('style')
+        style.innerHTML = `
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .dropdown-card{
+                display: none;
+                position:absolute;
+                left:50%;
+                margin-left:-30px;
+                width:60px;
+                line-height: 22px;
+                font-size:12px;
+                border:1px solid #d0d0d0;
+                background: #fff;
+                text-align: center;
+                z-index:10;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border:hover .dropdown-card{
+                display: block;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .dropdown-card:before{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #d0d0d0;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-8px;
+                left:50%;
+                margin-left:-5px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .dropdown-card:after{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #ffffff;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-6px;
+                left:50%;
+                margin-left:-5px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .border-button{
+                position: relative;
+                float:left;
+                margin:4px 2px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .border-button .tip{
+                display: none;
+                position:absolute;
+                left:50%;
+                margin-left:-35px;
+                width:70px;
+                line-height: 22px;
+                font-size:12px;
+                border:1px solid #d0d0d0;
+                background: #fff;
+                text-align: center;
+                z-index:10;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .border-button:hover .tip{
+                display: block;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .border-button .tip:before{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #d0d0d0;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-8px;
+                left:50%;
+                margin-left:-5px;
+            }
+            #daodao_excel_scroll_toolbar-wrapper .toolbar-border .border-button .tip:after{
+                content:'';
+                width:0;
+                height:0;
+                border-bottom:8px solid #ffffff;
+                border-right:5px solid transparent;
+                border-left:5px solid transparent;
+                position:absolute;
+                top:-6px;
+                left:50%;
+                margin-left:-5px;
+            }
+        `
+        this.el.appendChild(style)
+
+        let div = document.createElement('div')
+        div.classList.add("toolbar-item","toolbar-button","toolbar-border")
+        div.id = id
+        div.innerHTML = html
+
+        this.el.appendChild(div)
+
+        this.borderButton = document.getElementById(id)
+
+        document.getElementById(id1).addEventListener('click',(event) => {
+            this.emit('changeBorder',{
+                data:document.getElementById(id1).dataset.type
+            })
+        })
+        document.getElementById(id2).addEventListener('click',(event) => {
+            this.emit('changeBorder',{
+                data:document.getElementById(id2).dataset.type
+            })
+        })
+    }
+    initAlignLeft(){
+        this.alignLeftButton = this.addButton(
+            '<svg t="1586934617479" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7837" width="16" height="16"><path d="M584.704 153.6 226.8672 153.6l0 102.0928 357.8368 0L584.704 153.6zM789.4528 357.8368 226.6112 357.8368l0 102.144 562.8416 0L789.4528 357.8368zM226.304 768.256l0 102.1952 614.3488 0 0-102.1952L226.304 768.256zM584.704 666.0608l0-102.0928L226.8672 563.968l0 102.0928L584.704 666.0608z" p-id="7838"></path></svg>',
+            '左对齐',
+             (e)=>{
+                this.emit('changeTextAlign',{
+                    data:'left'
+                })
+             },
+             true   
+        )
+    }
+    initAlignRight(){
+        this.alignRightButton = this.addButton(
+            '<svg t="1586934702347" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8391" width="16" height="16"><path d="M461.4144 153.6l0 102.0928L819.2 255.6928 819.2 153.6 461.4144 153.6zM256.3072 459.9296 819.2 459.9296 819.2 357.7856 256.3072 357.7856 256.3072 459.9296zM204.8 870.4l614.4 0 0-102.0928L204.8 768.3072 204.8 870.4zM461.4144 666.112 819.2 666.112l0-102.0928L461.4144 564.0192 461.4144 666.112z" p-id="8392"></path></svg>',
+            '右对齐',
+             (e)=>{
+                this.emit('changeTextAlign',{
+                    data:'right'
+                })
+             },
+             true   
+        )
+    }
+    initAlignCenter(){
+        this.alignCenterButton = this.addButton(
+            '<svg t="1586934902654" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8995" width="16" height="16"><path d="M162.304 186.88H865.28v63.488H162.304zM246.272 376.832h534.528V440.32H246.272zM162.304 567.296H865.28v63.488H162.304zM246.272 757.248h534.528v63.488H246.272z" fill="#000000" p-id="8996"></path></svg>',
+            '居中对齐',
+             (e)=>{
+                this.emit('changeTextAlign',{
+                    data:'center'
+                })
+             },
+             true   
+        )
+    }
+    initMergeCell(){
+        this.mergeCellButton = this.addButton(
+            '<svg t="1586934956797" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9296" width="16" height="16"><path d="M401.408 522.24h-196.608v-40.96h196.608l-47.104-47.104c-8.192-8.192-8.192-20.48 0-28.672 8.192-8.192 20.48-8.192 28.672 0l96.256 96.256-96.256 96.256c-8.192 8.192-20.48 8.192-28.672 0-8.192-8.192-8.192-20.48 0-28.672l47.104-47.104z m221.184-40.96h196.608v40.96h-196.608l47.104 47.104c8.192 8.192 8.192 20.48 0 28.672-8.192 8.192-20.48 8.192-28.672 0l-96.256-96.256 96.256-96.256c8.192-8.192 20.48-8.192 28.672 0 8.192 8.192 8.192 20.48 0 28.672l-47.104 47.104z m-202.752 286.72h40.96v61.44c0 34.816-26.624 61.44-61.44 61.44h-225.28c-34.816 0-61.44-26.624-61.44-61.44v-634.88c0-34.816 26.624-61.44 61.44-61.44h225.28c34.816 0 61.44 26.624 61.44 61.44v61.44h-40.96v-61.44c0-10.24-8.192-20.48-20.48-20.48h-225.28c-10.24 0-20.48 8.192-20.48 20.48v634.88c0 12.288 8.192 20.48 20.48 20.48h225.28c10.24 0 20.48-8.192 20.48-20.48v-61.44z m143.36 0h40.96v61.44c0 12.288 8.192 20.48 20.48 20.48h225.28c10.24 0 20.48-10.24 20.48-20.48v-634.88c0-12.288-8.192-20.48-20.48-20.48h-225.28c-10.24 0-20.48 10.24-20.48 20.48v63.488h-40.96V194.56c0-34.816 26.624-61.44 61.44-61.44h225.28c34.816 0 61.44 26.624 61.44 61.44v634.88c0 34.816-26.624 61.44-61.44 61.44h-225.28c-34.816 0-61.44-26.624-61.44-61.44v-61.44z" p-id="9297"></path></svg>',
+            '合并单元格',
+             (e)=>{
+                this.emit('mergeCell',{
+                    data:true
+                })
+             },
+             false   
+        )
+    }
+    initSplitCell(){
+        this.mergeCellButton = this.addButton(
+            '<svg t="1586935001418" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9451" width="16" height="16"><path d="M882.688 522.24h-196.608v-40.96h196.608l-47.104-47.104c-8.192-8.192-8.192-20.48 0-28.672 8.192-8.192 20.48-8.192 28.672 0l96.256 96.256-96.256 96.256c-8.192 8.192-20.48 8.192-28.672 0-8.192-8.192-8.192-20.48 0-28.672l47.104-47.104z m-741.376-40.96h196.608v40.96h-196.608l47.104 47.104c8.192 8.192 8.192 20.48 0 28.672-8.192 8.192-20.48 8.192-28.672 0l-96.256-96.256 96.256-96.256c8.192-8.192 20.48-8.192 28.672 0 8.192 8.192 8.192 20.48 0 28.672l-47.104 47.104z m718.848 286.72h40.96v61.44c0 34.816-26.624 61.44-61.44 61.44h-225.28c-34.816 0-61.44-26.624-61.44-61.44v-634.88c0-34.816 26.624-61.44 61.44-61.44h225.28c34.816 0 61.44 26.624 61.44 61.44v61.44h-40.96v-61.44c0-10.24-8.192-20.48-20.48-20.48h-225.28c-10.24 0-20.48 8.192-20.48 20.48v634.88c0 12.288 8.192 20.48 20.48 20.48h225.28c10.24 0 20.48-8.192 20.48-20.48v-61.44z m-737.28 0h40.96v61.44c0 12.288 8.192 20.48 20.48 20.48h225.28c10.24 0 20.48-10.24 20.48-20.48v-634.88c0-12.288-8.192-20.48-20.48-20.48h-225.28c-10.24 0-20.48 10.24-20.48 20.48v63.488h-40.96V194.56c0-34.816 26.624-61.44 61.44-61.44h225.28c34.816 0 61.44 26.624 61.44 61.44v634.88c0 34.816-26.624 61.44-61.44 61.44h-225.28c-34.816 0-61.44-26.624-61.44-61.44v-61.44z" p-id="9452"></path></svg>',
+            '取消合并',
+             (e)=>{
+                this.emit('splitCell',{
+                    data:true
+                })
+             },
+             false   
+        )
+    }
+    initAddImage(){
+        this.addImageButton = this.addButton(
+            '<svg t="1586935088202" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9639" width="16" height="16"><path d="M896 626.592a16 16 0 0 0-7.68-13.664l-172.448-105.088a16 16 0 0 0-20.704 3.52l-76 92.608-1.024 1.152a16 16 0 0 1-22.624 0.032l-252.832-252.064a16.032 16.032 0 0 0-22.08-0.512l-187.36 170.656a15.936 15.936 0 0 0-5.248 11.84V800h768v-173.408z" p-id="9640"></path><path d="M800 320m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" p-id="9641"></path><path d="M32 128v768h960V128H32z m896 704H96V192h832v640z" p-id="9642"></path></svg>',
+            '插入图片',
+             (e)=>{
+                this.emit('addImage',{
+                    data:true
+                })
+             },
+             false   
+        )
     }
     addButton(innerHTML,tip,func,hasStatus){
         let dom = document.createElement('div')
@@ -490,6 +709,19 @@ class ToolBar extends Event{
             this.fontItalicButton.classList.add('active')
         }else{
             this.fontItalicButton.classList.remove('active')
+        }
+        if(config.textAlign == 'left'){
+            this.alignLeftButton.classList.add('active')
+            this.alignRightButton.classList.remove('active')
+            this.alignCenterButton.classList.remove('active')
+        }else if(config.textAlign == 'right'){
+            this.alignRightButton.classList.add('active')
+            this.alignLeftButton.classList.remove('active')
+            this.alignCenterButton.classList.remove('active')
+        }else if(config.textAlign == 'center'){
+            this.alignCenterButton.classList.add('active')
+            this.alignRightButton.classList.remove('active')
+            this.alignLeftButton.classList.remove('active')
         }
     }
 }

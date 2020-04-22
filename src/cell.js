@@ -27,7 +27,10 @@ class Cell extends zrender.Group{
                 fontWeight:data.fontWeight,
                 fontStyle:data.fontStyle,
                 textFill:data.textFill,
-                fill:data.fill
+                fill:data.fill,
+                textAlign:'center',
+                textPosition:'inside',
+                textOffset:[0,0]
             }
         }
         let finnalconfig = Object.assign({},defaultCellConfig,config,countConfig)
@@ -95,6 +98,40 @@ class Cell extends zrender.Group{
     setFill(data){
         this.cell.attr({style:{fill:data}})
         this.data.fill = data
+    }
+    //设置边框
+    setBorder(data){
+        if(data == 'true'){
+            this.cell.attr({style:{stroke: '#000',lineWidth:2}})
+            this.cell.attr({z:2})
+        }else{
+            this.cell.attr({style:{stroke: '#aaa',lineWidth:1}})
+            this.cell.attr({z:1})
+        }
+        this.data.border = data
+    }
+    //设置对齐方式
+    setTextAlign(data){
+        if(data == 'left'){
+            this.cell.attr({style:{
+                textAlign:'left',
+                textPosition:'left',
+                textOffset:[10,0]
+            }})
+        }else if(data == 'right'){
+            this.cell.attr({style:{
+                textAlign:'right',
+                textPosition:'right',
+                textOffset:[-10,0]
+            }})
+        }else if(data == 'center'){
+            this.cell.attr({style:{
+                textAlign:'center',
+                textPosition:'inside',
+                textOffset:[0,0]
+            }})
+        }
+        this.data.textAlign = data
     }
     //设置单元格data
     setData(data){
