@@ -141,13 +141,15 @@ class Cell extends zrender.Group{
             width:this.data.cellWidth * 2,
             height:this.data.cellHeight * 2
         }})
-        if(this.img){
-            this.img.attr({
-                style:{
-                    width:this.data.cellWidth,
-                    height:this.data.cellHeight
-                }
-            })
+        //更改图片
+        if(this.data.imgUrl){
+            this.addImage(this.data.imgUrl)
+        }else{
+            if(this.img){
+                this.removeImage()
+            }else{
+                
+            }
         }
         //更改cell的显示隐藏
         if(this.data.merge == true && (this.data.row == 0 || this.data.span == 0)){
@@ -156,6 +158,24 @@ class Cell extends zrender.Group{
             this.show()
         }
         this.attr('position',[this.data.xPlace,this.data.yPlace])
+        //更改文字
+        this.setText(this.data.text)
+        //更改字体
+        this.setFontFamily(this.data.fontFamily)
+        //更改字体大小
+        this.setFontSize(this.data.fontSize)
+        //更改文字粗细
+        this.setFontWeight(this.data.fontWeight)
+        //更改文字倾斜
+        this.setFontItalic(this.data.fontStyle)
+        //更改字体颜色
+        this.setTextFill(this.data.textFill)
+        //更改背景颜色
+        this.setFill(this.data.fill)
+        //设置边框
+        this.setBorder(this.data.border)
+        //设置对齐方式
+        this.setTextAlign(this.data.textAlign)
     }
     //添加图片
     addImage(url){
@@ -183,6 +203,45 @@ class Cell extends zrender.Group{
             this.img = null
             this.data.imgUrl = ""
         }
+    }
+    clear(){
+        let data = {
+            fontFamily:'微软雅黑',
+            fontSize:14,
+            fontStyle:'normal',
+            fontWeight:'normal',
+            textFill:'#000000',
+            fill:'#ffffff',
+            border:false,
+            textAlign:'center',
+            cellWidth:this.data.cellWidth,
+            cellHeight:this.data.cellHeight,
+            merge:this.data.merge,
+            row:this.data.row,
+            span:this.data.span,
+            mergeConfig:this.data.mergeConfig,
+            text:"",
+            xPlace:this.data.xPlace,
+            yPlace:this.data.yPlace,
+            imgUrl:'',
+            x:this.data.x,
+            y:this.data.y
+        }
+        this.data = data
+        this.setData(data)
+    }
+    clearFormat(){
+        let data = {
+            fontFamily:'微软雅黑',
+            fontSize:14,
+            fontStyle:'normal',
+            fontWeight:'normal',
+            textFill:'#000000',
+            fill:'#ffffff',
+            border:false,
+            textAlign:'center',
+        }
+        this.setData(data)
     }
 }
 

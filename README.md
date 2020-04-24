@@ -1,13 +1,4 @@
-# daodaoExcel
-web excel插件，基于canvas
+#daodaoExcel
+    基于canvas的和js开发的类excel表格，支持用户自定义添加工具栏以及右键菜单
 
-npm install
-
-npm run dev
-
-npm run build
-
-接下来的任务：
-1.写复制粘贴单元格的逻辑
-2.实现撤销功能
-3.写api文档
+##基本使用

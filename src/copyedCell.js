@@ -1,7 +1,7 @@
 import zrender from 'zrender'
 import {headerHeight,indexWidth} from './config'
 
-class SelectCell extends zrender.Rect{
+class CopyedCell extends zrender.Rect{
     constructor(cells){
         let originConfig = {
             cursor:'default',
@@ -9,6 +9,7 @@ class SelectCell extends zrender.Rect{
                 stroke: '#4e9fff',
                 lineWidth:'2',
                 fill:'none',
+                lineDash:[5]
             },
             z:3
         }
@@ -66,8 +67,7 @@ class SelectCell extends zrender.Rect{
             shape.height = height
         }
         this.attr('shape',shape)
-        console.log(this)
     }
 }
 
-export default SelectCell
+export default CopyedCell

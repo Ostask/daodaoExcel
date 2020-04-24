@@ -1,6 +1,7 @@
 import zrender from 'zrender'
 import Cell from './cell.js'
 import SelectCell from './selectCell.js'
+import CopyedCell from './copyedCell.js'
 import TableHeaderCell from './tableHeaderCell.js'
 import TableIndexCell from './tableIndexCell.js'
 import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
@@ -26,8 +27,12 @@ class DaoDaoExcel {
         this.activeCell = null
         //当前选中的单元格
         this.selectCells = []
+        //当前在剪贴板中的单元格
+        this.copyCells = []
         //选中的时候显示的那个蓝色框框
         this.selectedCell = null
+        //copyCells有数据的那个蓝色框框
+        this.copyedCell = null
         //表头a-z
         this.tableHeader = null
         //表头a-z单元格
@@ -133,10 +138,7 @@ class DaoDaoExcel {
         this.selectCells.forEach(cell => {
             cell.selectCell()
         })
-        this.selectedCell.change(this.selectCells,{
-            cellWidth:this.currentObj.cellWidth,
-            cellHeight:this.currentObj.cellHeight
-        })
+        this.selectedCell.change(this.selectCells)
         this.activeCell.unSelectCell()
         this.changeHeaderAndIndexState(this.selectCells)
     }
@@ -184,6 +186,9 @@ class DaoDaoExcel {
                 this.selectedCell = new SelectCell(this.selectCells)
                 this.canvas.add(this.selectedCell)
             }
+            let positionX = this.table.position[0]
+            let positionY = this.table.position[1]
+            this.selectedCell.attr('position',[positionX,positionY])
             //更新一下列和行的选择状态
             this.changeHeaderAndIndexState(this.selectCells)
             this.table.on('mousemove',this.handleTableMouseMove,this)
@@ -252,6 +257,35 @@ class DaoDaoExcel {
         let yend = ye
         let that = this
         let list = []
+        getBoundXY()
+        function getBoundXY(){
+            for(let x = xstart;x <= xend;x++){
+                for(let y = ystart;y <= yend;y++){
+                    if(that.cells[x][y].data.merge == true&&that.cells[x][y].data.mergeConfig){
+                        let flag = false
+                        if(that.cells[x][y].data.mergeConfig.xstart < xstart){
+                            xstart = that.cells[x][y].data.mergeConfig.xstart
+                            flag = true
+                        }
+                        if(that.cells[x][y].data.mergeConfig.xend > xend){
+                            xend = that.cells[x][y].data.mergeConfig.xend
+                            flag = true
+                        }
+                        if(that.cells[x][y].data.mergeConfig.ystart < ystart){
+                            ystart = that.cells[x][y].data.mergeConfig.ystart
+                            flag = true
+                        }
+                        if(that.cells[x][y].data.mergeConfig.yend > yend){
+                            yend = that.cells[x][y].data.mergeConfig.yend
+                            flag = true
+                        }
+                        if(flag){
+                            getBoundXY()
+                        }
+                    }
+                }
+            }
+        }
         for(let x = xstart;x <= xend;x++){
             for(let y = ystart;y <= yend;y++){
                 list.push(this.cells[x][y])
@@ -360,12 +394,164 @@ class DaoDaoExcel {
                     //删除
                     if(!this.edit.editFlag){
                         this.selectCells.forEach(cell => {
-                            cell.setText("")
+                            cell.clear()
                         })
                     }   
                     break;    
+                case 67:
+                    //ctrl+c
+                    if(event.ctrlKey){
+                        console.log('你按了复制哦')
+                        this.setCopyCell()
+                    }
+                    break;    
+                case 86:
+                    //ctrl+v
+                    if(event.ctrlKey){
+                        console.log('你按了粘贴哦')
+                        this.pastCopyCell()
+                    }
+                    break;        
             }
         })
+    }
+    setCopyCell(){
+        //初始化选中的蓝色框框
+        if(this.copyedCell){
+            //如果有选择框了就更新位置
+            this.copyedCell.change(this.selectCells)
+        }else{
+            //如果没有选择框就创建一个
+            this.copyedCell = new CopyedCell(this.selectCells)
+            this.canvas.add(this.copyedCell)
+        }
+        let positionX = this.table.position[0]
+        let positionY = this.table.position[1]
+        this.copyedCell.attr('position',[positionX,positionY])
+        this.copyCells = []
+        for(let i = 0;i<this.selectCells.length;i++){
+            let obj = zrender.util.clone(this.selectCells[i].data)
+            delete obj.cellHeight
+            delete obj.cellWidth
+            delete obj.xPlace
+            delete obj.yPlace
+
+            this.copyCells.push(obj)
+        }
+        console.log(this.copyCells)
+    }
+    pastCopyCell(){
+        if(this.copyCells.length == 0){
+            return false
+        }
+        let copyTemp = []
+        //计算copyCells有几列几行
+        let copyMax = Math.max(...this.copyCells.map(item => item.x))
+        let copyMin = Math.min(...this.copyCells.map(item => item.x))
+        let copyYMin =  Math.min(...this.copyCells.map(item => item.y))
+        let copySpan = copyMax - copyMin + 1
+        let copyRow = this.copyCells.length / copySpan
+
+        let tempSelect = []
+        let selectMax = Math.max(...this.selectCells.map(item => item.data.x))
+        let selectMin = Math.min(...this.selectCells.map(item => item.data.x))
+        let selectYMin = Math.min(...this.selectCells.map(item => item.data.y))
+        let selectYMax = Math.max(...this.selectCells.map(item => item.data.y))
+        let selectSpan = selectMax - selectMin + 1
+        let selectRow = this.selectCells.length / selectSpan
+
+        //如果选择的不是复制的整数倍的话，就去掉几个格子
+        if(selectRow / copyRow < 1||selectSpan / copySpan < 1){
+            alert('复制粘贴的位置不够，请重新选择')
+            return false
+        }
+       
+        if(selectRow % copyRow != 0){
+            selectYMax -= selectRow % copyRow
+            selectRow -= selectRow % copyRow
+        }
+        if(selectSpan % copySpan != 0){
+            selectMax -= selectSpan % copySpan
+            selectSpan -= selectSpan % copySpan
+        }
+
+        this.selectCells.forEach(cell => {
+            cell.unSelectCell()
+        })
+        this.selectCells = []
+        for(let i = selectMin;i<=selectMax;i++){
+            for(let j = selectYMin;j<=selectYMax;j++){
+                this.selectCells.push(this.cells[i][j])
+            }
+        }
+
+        for(let i = 0;i < copyRow;i++){
+            copyTemp.push([])
+            for(let j = 0;j<copySpan;j++){
+                delete this.copyCells[j*copyRow + i].x
+                delete this.copyCells[j*copyRow + i].y
+
+                copyTemp[i].push(this.copyCells[j*copyRow + i])
+            }
+        }
+
+        for(let i = 0;i < selectRow;i++){
+            tempSelect.push([])
+            for(let j = 0;j<selectSpan;j++){
+                tempSelect[i].push(this.selectCells[j*selectRow + i])
+            }
+        }
+
+        for(let i = 0;i<tempSelect.length;i++){
+            for(let j = 0;j<tempSelect[i].length;j++){
+                //如果这一格是合并的单元格，那重新计算一下mergeConfig
+                if(copyTemp[i%copyRow][j%copySpan].merge == true && copyTemp[i%copyRow][j%copySpan].mergeConfig){
+                    let disX = selectMin - copyMin
+                    let disY = selectYMin - copyYMin
+                    let xstart = copyTemp[i%copyRow][j%copySpan].mergeConfig.xstart;
+                    let xend = copyTemp[i%copyRow][j%copySpan].mergeConfig.xend;
+                    let ystart = copyTemp[i%copyRow][j%copySpan].mergeConfig.ystart;
+                    let yend = copyTemp[i%copyRow][j%copySpan].mergeConfig.yend;
+
+                    xstart += (copySpan*Math.floor(j/copySpan)+disX)
+                    xend += (copySpan*Math.floor(j/copySpan)+disX)
+                    ystart += (copyRow*Math.floor(i/copyRow) + disY)
+                    yend += (copyRow*Math.floor(i/copyRow)+ disY)
+
+                    let width = 0
+                    let height = 0
+
+                    for(let m = copyTemp[i%copyRow][j%copySpan].mergeConfig.xstart;m<=copyTemp[i%copyRow][j%copySpan].mergeConfig.xend;m++){
+                        width += this.tableHeaderCell[m].data.width
+                    }
+
+                    for(let m = copyTemp[i%copyRow][j%copySpan].mergeConfig.ystart;m<=copyTemp[i%copyRow][j%copySpan].mergeConfig.yend;m++){
+                        height += this.tableIndexCell[m].data.height
+                    }
+
+                    tempSelect[i][j].setData(copyTemp[i%copyRow][j%copySpan])
+                    tempSelect[i][j].setData({
+                        cellWidth:width,
+                        cellHeight:height,
+                        mergeConfig:{
+                            xstart:xstart,
+                            xend:xend,
+                            ystart:ystart,
+                            yend:yend
+                        }
+                    })
+                }else{
+                    tempSelect[i][j].setData(copyTemp[i%copyRow][j%copySpan])
+                }
+            }
+        }
+        this.selectCells.forEach(cell => {
+            cell.selectCell()
+        })
+        this.activeCell.unSelectCell()
+        this.copyCells = []
+        this.canvas.remove(this.copyedCell)
+        this.copyedCell = null
     }
     addTableHeaderCell(config){
         let headCell = new TableHeaderCell(config)
@@ -705,6 +891,9 @@ class DaoDaoExcel {
             if(this.selectedCell){
                  this.selectedCell.attr('position',[positionX,moveY])
             }
+            if(this.copyedCell){
+                this.copyedCell.attr('position',[positionX,moveY])
+            }
         })
         this.scroll.on('scrollX',(e) => {
             //隐藏编辑框
@@ -722,6 +911,9 @@ class DaoDaoExcel {
             this.tableHeader.attr('position',[moveX, positionHeaderY])
             if(this.selectedCell){
                  this.selectedCell.attr('position',[moveX, positionY])
+            }
+            if(this.copyedCell){
+                this.copyedCell.attr('position',[moveX,positionY])
             }
         })
         this.canvas.on('mousewheel',(event) => {
@@ -747,6 +939,9 @@ class DaoDaoExcel {
                 if(this.selectedCell){
                      this.selectedCell.attr('position',[positionX,moveY])
                 }
+                if(this.copyedCell){
+                    this.copyedCell.attr('position',[positionX,moveY])
+                }
                 //更新滚动条位置                
             }else{
                 let positionX = this.table.position[0]
@@ -761,6 +956,9 @@ class DaoDaoExcel {
                 this.tableIndex.attr('position',[positionIndexX,moveY])
                 if(this.selectedCell){
                     this.selectedCell.attr('position',[positionX,moveY])
+                }
+                if(this.copyedCell){
+                    this.copyedCell.attr('position',[positionX,moveY])
                 }
             }
         })
@@ -901,8 +1099,7 @@ class DaoDaoExcel {
 
         const clearInputBtn = this.contextMenu.addButton('清除内容',() => {
             this.selectCells.forEach(cell => {
-                cell.setText("")
-                cell.removeImage()
+                cell.clear()
             })
         })
 
@@ -1041,6 +1238,16 @@ class DaoDaoExcel {
             this.refreshCell()
         })
 
+        //复制
+        const copy = this.contextMenu.addButton('复制',() => {
+            this.setCopyCell()
+        })
+
+        //粘贴
+        const paste = this.contextMenu.addButton('粘贴',() => {
+            this.pastCopyCell()
+        })
+
         //右键菜单
         this.canvas.on("contextmenu",(event) => {
             preventDefault(event.event)
@@ -1109,6 +1316,16 @@ class DaoDaoExcel {
         //刷新选择框
         if(this.selectCells.length > 0){
             this.selectedCell.change(this.selectCells)
+            this.selectCells.forEach(cell => {
+                cell.selectCell()
+            })
+            this.activeCell.unSelectCell()
+        }
+        //刷新复制框
+        if(this.copyedCell){
+            this.copyCells = []
+            this.canvas.remove(this.copyedCell)
+            this.copyedCell = null
         }
         //刷新滚动条
         this.refreshScroll()
@@ -1291,6 +1508,17 @@ class DaoDaoExcel {
     }
     initToolBar(parent){
         this.toolBar = new ToolBar(parent)
+        this.toolBar.on('copy',(e) => {
+            this.setCopyCell()
+        })
+        this.toolBar.on('paste',(e) => {
+            this.pastCopyCell()
+        })
+        this.toolBar.on('clearFormat',(e) => {
+            this.selectCells.forEach(cell =>{
+                cell.clearFormat()
+            })
+        })
         this.toolBar.on('changeTypeFace',(e) => {
             //更改selectCells的fontFamily
             this.selectCells.forEach(cell => {

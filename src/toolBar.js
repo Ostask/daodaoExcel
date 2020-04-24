@@ -6,6 +6,9 @@ class ToolBar extends Event{
         super()
         this.el = null
         this.parent = parent
+        this.copyButton = null
+        this.pasteButton = null
+        this.clearFormat = null
         this.typeFaceButton = null
         this.fontSizeButton = null
         this.fontWeightButton = null
@@ -31,6 +34,9 @@ class ToolBar extends Event{
         const first = parent.firstChild
         parent.insertBefore(this.el,first)
         this.initStyle()
+        this.initCopy()
+        this.initPaste()
+        this.initClearFormat()
         this.initTypeFace()
         this.initFontSize()
         this.initFontWeight()
@@ -112,6 +118,42 @@ class ToolBar extends Event{
             }
         `
         this.el.appendChild(style)
+    }
+    initCopy(){
+        this.copyButton = this.addButton(
+            '<svg t="1587712853665" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1189" width="16" height="16"><path d="M677.6 232.8h-503.2c-61.6 0-112 50.4-112 112v503.2c0 61.6 50.4 112 112 112h503.2c61.6 0 112-50.4 112-112V344.8c-0.8-62.4-50.4-112-112-112z m56 614.4c0 31.2-24.8 56-56 56h-503.2c-31.2 0-56-24.8-56-56v-503.2c0-31.2 24.8-56 56-56h503.2c31.2 0 56 24.8 56 56v503.2z" p-id="1190"></path><path d="M230.4 432h391.2v56h-391.2zM230.4 568h391.2v56h-391.2zM230.4 703.2h223.2v56h-223.2z" p-id="1191"></path><path d="M844.8 64.8h-503.2c-61.6 0-112 50.4-112 112h56c0-31.2 24.8-56 56-56h503.2c31.2 0 56 24.8 56 56v503.2c0 31.2-24.8 56-56 56v56c61.6 0 112-50.4 112-112V176.8c0-62.4-50.4-112-112-112z" p-id="1192"></path></svg>',
+            '复制',
+             (e)=>{
+                this.emit('copy',{
+                    data:true
+                })
+             },
+             false   
+        )
+    }
+    initPaste(){
+        this.copyButton = this.addButton(
+            '<svg t="1587713229749" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1790" width="16" height="16"><path d="M469.12 80.64h128a32 32 0 0 0 32-32 32 32 0 0 0-32-32h-128a32 32 0 0 0-32 32 32 32 0 0 0 32 32zM276.48 174.08a32 32 0 0 0 32-32v-29.44a32 32 0 0 1 31.36-32 32 32 0 0 0 32-32 33.28 33.28 0 0 0-32.64-32 96.64 96.64 0 0 0-94.72 96v29.44a32 32 0 0 0 32 32zM727.68 80.64h128a32 32 0 0 0 32-32 32 32 0 0 0-32-32h-128a32 32 0 0 0-32 32 32 32 0 0 0 32 32zM976 571.52a32 32 0 0 0-32 32v128a32.64 32.64 0 0 0 32 32 32 32 0 0 0 32-32v-128a32 32 0 0 0-32-32zM912 794.88h-128a32.64 32.64 0 0 0-32 32 32 32 0 0 0 32 32h128a31.36 31.36 0 0 0 31.36-32 33.28 33.28 0 0 0-31.36-32zM1000.32 74.24A32 32 0 0 0 960 57.6a32.64 32.64 0 0 0-16.64 42.24 28.8 28.8 0 0 1 0 12.8v103.04a32.64 32.64 0 0 0 32 32 32 32 0 0 0 32-32V112.64a97.92 97.92 0 0 0-7.04-38.4zM976 312.96a32 32 0 0 0-32 32v128a32.64 32.64 0 0 0 32 32 32 32 0 0 0 32-32v-128a32 32 0 0 0-32-32z" fill="#323333" p-id="1791"></path><path d="M683.52 1006.08H112a96 96 0 0 1-96-96V259.84a96 96 0 0 1 96-96h571.52a96 96 0 0 1 96 96v650.24a96 96 0 0 1-96 96zM112 227.84a32 32 0 0 0-32 32v650.24a32 32 0 0 0 32 32h571.52a32 32 0 0 0 32-32V259.84a32 32 0 0 0-32-32z" fill="#323333" p-id="1792"></path><path d="M604.16 423.68H192a32 32 0 0 1-32-32 32 32 0 0 1 32-32h412.16a32 32 0 0 1 32 32 32.64 32.64 0 0 1-32 32zM604.16 616.96H192a32 32 0 0 1 0-64h412.16a32 32 0 0 1 0 64zM604.16 810.24H192a32 32 0 0 1-32-32 32 32 0 0 1 32-32h412.16a32.64 32.64 0 0 1 32 32 32 32 0 0 1-32 32z" fill="#323333" p-id="1793"></path></svg>',
+            '粘贴',
+             (e)=>{
+                this.emit('paste',{
+                    data:true
+                })
+             },
+             false   
+        )
+    }
+    initClearFormat(){
+        this.copyButton = this.addButton(
+            '<svg t="1587714676050" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2007" width="16" height="16"><path d="M970.105263 970.105263H53.894737V485.052632h916.210526v485.052631zM107.789474 916.210526h808.421052v-377.263158H107.789474v377.263158z" fill="#444A5C" p-id="2008"></path><path d="M970.105263 538.947368H53.894737V323.368421h301.810526V53.894737h307.2v269.473684H970.105263v215.578947zM107.789474 485.052632h808.421052V377.263158h-301.810526V107.789474H409.6v269.473684H107.789474v107.789474z" fill="#444A5C" p-id="2009"></path><path d="M700.631579 646.736842v323.368421h53.894737v-323.368421h-53.894737z m-323.368421 269.473684h53.894737v-107.789473H377.263158v107.789473z m-107.789474 53.894737h53.894737v-269.473684H269.473684v269.473684z" fill="#444A5C" p-id="2010"></path></svg>',
+            '清除格式',
+             (e)=>{
+                this.emit('clearFormat',{
+                    data:true
+                })
+             },
+             false   
+        )
     }
     initTypeFace(){
         const id = generateUUID()

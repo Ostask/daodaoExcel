@@ -24,7 +24,7 @@ class TableHeaderCell extends zrender.Group{
                 fill: 'white',
                 lineWidth:'1'
             },
-            z:1
+            z:10
         }
         let finnalconfig = Object.assign({},defaultConfig,config,countConfig)
         super({position:[xPlace,yPlace],z:1000})
