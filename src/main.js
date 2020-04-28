@@ -993,7 +993,7 @@ class DaoDaoExcel {
             //cells插入列
             let insertArr = new Array()
             for(let y = 0;y < this.tableIndexCell.length;y++){
-                insertArr[y] = new Cell({
+                insertArr[y] = new Cell({...{
                     x:index+1,
                     y:y,
                     cellWidth:this.currentObj.cellWidth,
@@ -1002,7 +1002,7 @@ class DaoDaoExcel {
                     span:1,
                     merge:false,
                     text:""
-                })
+                },...this.textConfig})
                 this.table.add(insertArr[y])
             }
             this.cells.splice(index+1,0,insertArr)
@@ -1050,7 +1050,7 @@ class DaoDaoExcel {
             }
             //cells插入行
             for(let x = 0;x < this.cells.length;x++){
-                let insert = new Cell({
+                let insert = new Cell({...{
                     x:x,
                     y:index + 1,
                     cellWidth:this.currentObj.cellWidth,
@@ -1059,10 +1059,11 @@ class DaoDaoExcel {
                     span:1,
                     merge:false,
                     text:""
-                })
+                },...this.textConfig})
                 this.cells[x].splice(index+1,0,insert)
                 this.table.add(insert)
             }
+            console.log(this.table)
             //更新所有cells的xy
             for(let x = 0;x<this.cells.length;x++){
                 for(let y=0;y<this.cells[x].length;y++){
@@ -1569,6 +1570,178 @@ class DaoDaoExcel {
         this.toolBar.on('addImage',(e) => {
             this.uploadFile.open()
         })
+    }
+    //改变列数
+    setSpanNum(number){
+        //检测有没有这么多列，如果没有的话，就删除单元格和Header,如果没有的话就添加单元格和Header
+        if(number <= this.tableHeaderCell.length){
+            while(number < this.tableHeaderCell.length){
+                //tableHeaderCell
+                this.tableHeader.remove(this.tableHeaderCell.pop())
+                //删除cells最末尾几列
+                for(let i=0;i<this.cells[this.cells.length - 1].length;i++){
+                    this.table.remove(this.cells[this.cells.length - 1][i])
+                }
+                this.cells.pop()
+            }
+
+            //重新绘制
+            this.refreshCell()
+        }else{
+            while(number > this.tableHeaderCell.length){
+                const index = this.tableHeaderCell.length
+                this.addTableHeaderCell({
+                    cellWidth:this.currentObj.cellWidth,
+                    cellHeight:headerHeight,
+                    index:index
+                })
+                //cells插入列
+                let insertArr = new Array()
+                for(let y = 0;y < this.tableIndexCell.length;y++){
+                    insertArr[y] = new Cell({...{
+                        x:index,
+                        y:y,
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight,
+                        row:1,
+                        span:1,
+                        merge:false,
+                        text:""
+                    },...this.textConfig})
+                    this.table.add(insertArr[y])
+                }
+                this.cells.splice(index,0,insertArr)
+            }
+            //重新绘制
+            this.refreshCell()
+        }
+    }
+    //改变行数
+    setRowNum(number){
+        //检测有没有这么多行，如果没有的话，就删除单元格和Index,如果没有的话就添加单元格和Index
+        if(number <= this.tableIndexCell.length){
+            while(number < this.tableIndexCell.length){
+                //删除tableIndexCell最末尾几个
+                this.tableIndex.remove(this.tableIndexCell.pop())
+                //删除cells最末尾几行
+                for(let i=0;i<this.cells.length;i++){
+                    this.table.remove(this.cells[i].pop())
+                }
+            }
+
+            //重新绘制
+            this.refreshCell()
+        }else{
+            while(number > this.tableIndexCell.length){
+                //新增tableIndexCell
+                //新增cells
+                const index = this.tableIndexCell.length
+                this.addTableIndexCell({
+                    cellWidth:indexWidth,
+                    cellHeight:this.currentObj.cellHeight,
+                    index:index
+                })
+                //cells插入行
+                for(let x = 0;x < this.cells.length;x++){
+                    let insert = new Cell({...{
+                        x:x,
+                        y:index,
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight,
+                        row:1,
+                        span:1,
+                        merge:false,
+                        text:""
+                    },...this.textConfig})
+                    this.cells[x].splice(index,0,insert)
+                    this.table.add(insert)
+                }
+            }
+            //重新绘制
+            this.refreshCell()
+        }
+    }
+    //获取全部数据
+    getTableDatas(){
+        let data = []
+        for(let i = 0;i<this.cells.length;i++){
+            let arr = []
+            for(let j = 0;j<this.cells[i].length;j++){
+                arr.push(JSON.parse(JSON.stringify(this.cells[i][j].data)))
+            }
+            data.push(arr)
+        }
+        return data
+    }
+    //批量填充全部数据
+    /*
+    *    config = {
+    *       data:Array 一维数组 或 二维数组,data中，x和y是必须的
+    *       clear:Boolean 填充数据时是否清空其他数据 true:清空 false:不清空
+    *    }
+    */
+    setTableDatas(data,clear = false){
+        //先检测data的长度，看有没有data，没有的话提示一下，有的话进行下一步
+        if(data){
+            if(data instanceof Array){
+                if(data.length > 0){
+                    if(clear){
+                        //先清空其他格子
+                        this.cells.forEach(list => {
+                            list.forEach(cell => {
+                                cell.clear()
+                                cell.clearFormat()
+                            })
+                        })
+                    }
+                    //判断data是一维数组还是二维数组
+                    if(data[0] instanceof Array){
+                        //判断data最大的x,y如果大于现在的，那就添加几行几列
+                        let arr = data.flat()
+                        console.log(arr)
+                        let maxX = Math.max(...arr.map(item => item.x))
+                        let maxY = Math.max(...arr.map(item => item.y))
+                        if(maxX > this.tableHeaderCell.length){
+                            this.setSpanNum(maxX+1)
+                        }
+                        if(maxY > this.tableIndexCell.length){
+                            this.setRowNum(maxY+1)
+                        }
+                        console.log(maxX,maxY)
+                        //二维
+                        for(let i = 0;i<data.length;i++){
+                            for(let j = 0;j<data[i].length;j++){
+                                this.cells[data[i][j].x][data[i][j].y].setData({
+                                    ...this.textConfig,...data[i][j]
+                                })
+                            }
+                        }
+                    }else{
+                        //判断data最大的x,y如果大于现在的，那就添加几行几列
+                        let maxX = Math.max(data.map(item => item.x))
+                        let maxY = Math.max(data.map(item => item.y))
+                        if(maxX > this.tableHeaderCell.length){
+                            this.setSpanNum(maxX)
+                        }
+                        if(maxY > this.tableIndexCell.length){
+                            this.setRowNum(maxY)
+                        }
+                        //一维
+                        for(let i = 0;i<data.length;i++){
+                            this.cells[data[i].x][data[i].y].setData({
+                                ...this.textConfig,...data[i]
+                            })
+                        }
+                    }
+                }else{
+                    return false
+                }
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
     }
 }
 

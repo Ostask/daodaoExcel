@@ -23,6 +23,7 @@ class Scroll extends Event{
         //鼠标点下去的时候的x,y坐标
         this.originMouseXY = [0,0]
         this.originScrollXY = [0,0]
+        this.parent = config.parent
         this.init(config.parent)
     }
     init(parent){
@@ -93,6 +94,7 @@ class Scroll extends Event{
             this.scrollHeightBtn.id = "daodao_excel_scroll_height_btn"
             this.scrollHeight.appendChild(this.scrollHeightBtn)
             const parent = this.config.parent
+            this.parent = parent
             parent.appendChild(this.scrollHeight)
             parent.style.position = "relative"
 
@@ -185,7 +187,8 @@ class Scroll extends Event{
     refresh(data){
         this.config = Object.assign({},this.config,data)
         //判断是否要纵向滚动条
-        if(this.config.wrapWidth < this.config.fullWidth){
+        console.log(this.config)
+        if(this.config.wrapHeight < this.config.fullHeight){
             if(this.scrollHeight){
                 //改一下纵向滚动条
                 //设置纵向滚动条的style
@@ -197,7 +200,7 @@ class Scroll extends Event{
         }else{
             //移除纵向滚动条
             if(this.scrollHeight){
-                parent.removeChild("daodao_excel_scroll_height_wrapper")
+                this.parent.removeChild(this.scrollHeight)
                 this.scrollHeight = null
             }
         }
@@ -214,7 +217,7 @@ class Scroll extends Event{
         }else{
             //移除纵向滚动条
             if(this.scrollWidth){
-                parent.removeChild("daodao_excel_scroll_width_wrapper")
+                this.parent.removeChild(this.scrollWidth)
                 this.scrollWidth = null
             }
         }

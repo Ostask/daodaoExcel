@@ -38,6 +38,7 @@ class ContextMenu {
             font-size: 14px;
         `
         this.menuEl.appendChild(btn)
+        this.menus.push(btn)
         btn.addEventListener("click",func)
         return btn
     }

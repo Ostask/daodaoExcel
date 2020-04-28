@@ -45,7 +45,7 @@ class TableHeaderCell extends zrender.Group{
                 fill: 'white',
                 lineWidth:'6',
             },
-            z:2
+            z:11
         })
         this.add(this.line)
         this.type = 'tableHeaderCell'

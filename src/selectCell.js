@@ -66,7 +66,6 @@ class SelectCell extends zrender.Rect{
             shape.height = height
         }
         this.attr('shape',shape)
-        console.log(this)
     }
 }
 

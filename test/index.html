@@ -6,10 +6,18 @@
     <title>web excel test</title>
 </head>
 <body>
+    <button id="btn">填充数据</button>
     <div id="daodao" style="width:1000px;height:600px;"></div>
     <script src="/daodaoExcel.js"></script>
     <script>
         var exc = new DaoDaoExcel({id:'daodao'})
+        document.getElementById('btn').addEventListener('click',() => {
+            let data = [
+                [{x:1,y:1,text:'123'},{x:1,y:2,text:'12354848'}],
+                [{x:35,y:40,text:'123aaa'},{x:6,y:8,text:'1235484aaaf8'}]
+            ]
+            exc.setTableDatas(data,true)
+        })
     </script>
 </body>
 </html>
