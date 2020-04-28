@@ -163,10 +163,10 @@
    #### 3. excel.setTableDatas(config)
         批量填入数据
         config:
-        | 属性        |  默认值       |  类型  | 含义                               |
-        | ----------  | ------       |------  |---------------------------------- |
-        | data        | 必填          | Array | 一维数组 或 二维数组,data中，x和y是必须的,其它属性参考 excel.cells[x][y].data | 
-        | clear       | false         | Boolean |填充数据时是否清空其他数据 true:清空 false:不清空                         |
+| 属性        |  默认值       |  类型  | 含义                               |
+| ----------  | ------       |------  |---------------------------------- |
+| data        | 必填          | Array | 一维数组 或 二维数组,data中，x和y是必须的,其它属性参考 excel.cells[x][y].data | 
+| clear       | false         | Boolean |填充数据时是否清空其他数据 true:清空 false:不清空                         |
 
    #### 4. excel.cells[x][y].setData(data)
         修改单元格数据，data格式见上面 cells.data
