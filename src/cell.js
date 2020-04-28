@@ -1,8 +1,9 @@
 import zrender from 'zrender'
 import {headerHeight,indexWidth} from './config'
+import  icons  from './icon'
 
 class Cell extends zrender.Group{
-    constructor(data,config){
+    constructor(data){
         let defaultCellConfig = {
             cursor:'default',
             scale:[0.5,0.5],
@@ -33,16 +34,20 @@ class Cell extends zrender.Group{
                 textOffset:[0,0]
             }
         }
-        let finnalconfig = Object.assign({},defaultCellConfig,config,countConfig)
+        let finnalconfig = Object.assign({},defaultCellConfig,countConfig)
         super({
             position:[xPlace,yPlace]
         })
         this.data = Object.assign({},data,{
             xPlace:xPlace,
-            yPlace:yPlace
+            yPlace:yPlace,
         })
         this.type = 'cell'
         this.img = null
+        this.ltIcon = null
+        this.rtIcon = null
+        this.lbIcon = null
+        this.rbIcon = null
         this.cell = null
         this.init(finnalconfig)
     }
@@ -176,6 +181,142 @@ class Cell extends zrender.Group{
         this.setBorder(this.data.border)
         //设置对齐方式
         this.setTextAlign(this.data.textAlign)
+        //设置左上角标
+        this.setLTIcon(this.data.ltIcon)
+        //设置右上角标
+        this.setRTIcon(this.data.rtIcon)
+        //设置左下角标
+        this.setLBIcon(this.data.lbIcon)
+        //设置右下角标
+        this.setRBIcon(this.data.rbIcon)
+    }
+    //设置左上角标
+    setLTIcon(data){
+        if(data){
+            if(data == "none"){
+                if(this.ltIcon){
+                    this.remove(this.ltIcon)
+                    this.ltIcon = null
+                }
+            }else{
+                if(this.ltIcon){
+                    this.remove(this.ltIcon)
+                }
+                this.ltIcon = new zrender.Image({
+                    style:{
+                        image:icons[data],
+                        x:0,
+                        y:0,
+                        width:15,
+                        height:15
+                    },
+                    z:3
+                })
+                this.add(this.ltIcon)
+            }
+        }else{
+            if(this.ltIcon){
+                this.remove(this.ltIcon)
+                this.ltIcon = null
+            }
+        }
+        this.data.ltIcon = data
+    }
+    //设置左下角标
+    setLBIcon(data){
+        if(data){
+            if(data == "none"){
+                if(this.lbIcon){
+                    this.remove(this.lbIcon)
+                    this.lbIcon = null
+                }
+            }else{
+                if(this.lbIcon){
+                    this.remove(this.lbIcon)
+                }
+                this.lbIcon = new zrender.Image({
+                    style:{
+                        image:icons[data],
+                        x:0,
+                        y:this.data.cellHeight - 15,
+                        width:15,
+                        height:15
+                    },
+                    z:3
+                })
+                this.add(this.lbIcon)
+            }
+        }else{
+            if(this.lbIcon){
+                this.remove(this.lbIcon)
+                this.lbIcon = null
+            }
+        }
+        this.data.lbIcon = data
+    }
+    //设置右上角标
+    setRTIcon(data){
+        if(data){
+            if(data == "none"){
+                if(this.rtIcon){
+                    this.remove(this.rtIcon)
+                    this.rtIcon = null
+                }
+            }else{
+                if(this.rtIcon){
+                    this.remove(this.rtIcon)
+                }
+                this.rtIcon = new zrender.Image({
+                    style:{
+                        image:icons[data],
+                        x:this.data.cellWidth - 15,
+                        y:0,
+                        width:15,
+                        height:15
+                    },
+                    z:3
+                })
+                this.add(this.rtIcon)
+            }
+        }else{
+            if(this.rtIcon){
+                this.remove(this.rtIcon)
+                this.rtIcon = null
+            }
+        }
+        this.data.rtIcon = data
+    }
+    //设置右下角标
+    setRBIcon(data){
+        if(data){
+            if(data == "none"){
+                if(this.rbIcon){
+                    this.remove(this.rbIcon)
+                    this.rbIcon = null
+                }
+            }else{
+                if(this.rbIcon){
+                    this.remove(this.rbIcon)
+                }
+                this.rbIcon = new zrender.Image({
+                    style:{
+                        image:icons[data],
+                        x:this.data.cellWidth - 15,
+                        y:this.data.cellHeight - 15,
+                        width:15,
+                        height:15
+                    },
+                    z:3
+                })
+                this.add(this.rbIcon)
+            }
+        }else{
+            if(this.rbIcon){
+                this.remove(this.rbIcon)
+                this.rbIcon = null
+            }
+        }
+        this.data.rbIcon = data
     }
     //添加图片
     addImage(url){

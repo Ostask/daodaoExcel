@@ -13,7 +13,7 @@
         var exc = new DaoDaoExcel({id:'daodao'})
         document.getElementById('btn').addEventListener('click',() => {
             let data = [
-                [{x:1,y:1,text:'123'},{x:1,y:2,text:'12354848'}],
+                [{x:1,y:1,text:'123',lbIcon:"rightArrow",ltIcon:"leftArrow",rtIcon:"upArrow",rbIcon:"filter"},{x:1,y:2,text:'12354848'}],
                 [{x:35,y:40,text:'123aaa'},{x:6,y:8,text:'1235484aaaf8'}]
             ]
             exc.setTableDatas(data,true)

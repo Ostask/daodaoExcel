@@ -42,6 +42,11 @@
 | xPlace      |(根据位置改变)| Number  |单元格左上角的像素坐标          |
 | y           |(根据位置改变)| Number  |单元格所在的纵向的坐标               |
 | yPlace      |(根据位置改变)| Number  |单元格左上角的像素坐标          |
+| ltIcon      |"none"  | String  |单元格左上角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
+| lbIcon      |"none"  | String  |单元格左下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
+| rtIcon      |"none"  | String  |单元格右上角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
+| rbIcon      |"none"  | String  |单元格右下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
+
 
 ##### 2.其它属性
     参考zrender的Elements属性
@@ -191,10 +196,13 @@
 
 ### 事件
   
-   #### 1.数据填充完毕事件
+   #### 1.单元格点击事件
+   clickCell事件
 
-   #### 2.单元格点击事件
+   例：
+```js
+    excel.on("clickCell",(data) =>{
+        console.log(data)
+    })
 
-   #### 3.刷新视图事件
-
-   #### 4.初始化完成事件
+```   

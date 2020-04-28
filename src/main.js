@@ -7,13 +7,15 @@ import TableIndexCell from './tableIndexCell.js'
 import {defaultTableConfig,headerHeight,indexWidth,scrollWidth} from './config'
 import Scroll from './scroll.js'
 import Edit from './edit.js'
+import Event from "./event.js"
 import ContextMenu from './contextMenu.js'
 import UploadFile from './uploadFile.js'
 import ToolBar from './toolBar.js'
 import { mouseWheelDirection, preventDefault,stopPropagation ,generateUUID} from "./utils.js"
 
-class DaoDaoExcel {
+class DaoDaoExcel extends Event {
     constructor(obj){
+        super()
         //默认配置
         const defaultObj = defaultTableConfig
         this.currentObj = {...defaultObj,...obj}
@@ -157,7 +159,7 @@ class DaoDaoExcel {
                     row:1,
                     span:1,
                     merge:false,
-                    text:""
+                    text:"",
                 },...this.textConfig})
                 this.table.add(this.cells[x][y])
             }
@@ -170,6 +172,7 @@ class DaoDaoExcel {
                 //如果点击的不是鼠标左键
                 return false
             }
+            this.emit("clickCell",{data:event.target.parent.data})
             //隐藏输入框
             this.edit.hideEdit()
             this.cancelSelectCell()
@@ -1330,7 +1333,6 @@ class DaoDaoExcel {
         }
         //刷新滚动条
         this.refreshScroll()
-        console.log(this.cells)
     }
     refreshTableHeaderCell(){
         let x = indexWidth
@@ -1707,7 +1709,6 @@ class DaoDaoExcel {
                         if(maxY > this.tableIndexCell.length){
                             this.setRowNum(maxY+1)
                         }
-                        console.log(maxX,maxY)
                         //二维
                         for(let i = 0;i<data.length;i++){
                             for(let j = 0;j<data[i].length;j++){

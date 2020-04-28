@@ -187,7 +187,6 @@ class Scroll extends Event{
     refresh(data){
         this.config = Object.assign({},this.config,data)
         //判断是否要纵向滚动条
-        console.log(this.config)
         if(this.config.wrapHeight < this.config.fullHeight){
             if(this.scrollHeight){
                 //改一下纵向滚动条
