@@ -1,5 +1,7 @@
 import zrender from 'zrender'
 import {headerHeight,indexWidth} from './config'
+import {generateCode } from "./utils.js"
+
 import  icons  from './icon'
 
 class Cell extends zrender.Group{
@@ -41,6 +43,7 @@ class Cell extends zrender.Group{
         this.data = Object.assign({},data,{
             xPlace:xPlace,
             yPlace:yPlace,
+            name:generateCode(data.x)+(data.y+1)
         })
         this.type = 'cell'
         this.img = null
@@ -141,6 +144,7 @@ class Cell extends zrender.Group{
     //设置单元格data
     setData(data){
         this.data = Object.assign({},this.data,data)
+        this.data.name = generateCode(this.data.x)+(this.data.y+1)
         //更改cell的大小
         this.cell.attr({shape:{
             width:this.data.cellWidth * 2,

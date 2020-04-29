@@ -7,12 +7,39 @@
 </head>
 <body>
     <button id="btn">移除</button>
+    <button id="btn1">改变行数</button>
+    <button id="btn2">改变列数</button>
+    <button id="btn3">获取数据</button>
+    <button id="btn4">填充数据</button>
+
+
+
     <div id="daodao" style="width:1000px;height:600px;"></div>
     <script src="/daodaoExcel.js"></script>
     <script>
         var exc = new DaoDaoExcel({id:'daodao'})
         document.getElementById('btn').addEventListener('click',() => {
             exc.dispose()
+        })
+        document.getElementById('btn1').addEventListener('click',() => {
+            exc.setRowNum(10)
+        })
+        document.getElementById('btn2').addEventListener('click',() => {
+            exc.setSpanNum(10)
+        })
+        document.getElementById('btn3').addEventListener('click',() => {
+            let data = excel.cells.map(res => res.data)
+            console.log(data)
+        })
+        document.getElementById('btn4').addEventListener('click',() => {
+            let data = [
+                [{x:1,y:1,text:'123',lbIcon:"rightArrow",ltIcon:"leftArrow",rtIcon:"upArrow",rbIcon:"filter"},{x:1,y:2,text:'12354848'}],
+                [{x:35,y:40,text:'123aaa'},{x:6,y:8,text:'1235484aaaf8'}]
+            ]
+            exc.setTableDatas(data,true)
+        })
+        exc.on("clickCell",(data) =>{
+            console.log("点击了哦",data)
         })
     </script>
 </body>

@@ -24,6 +24,7 @@
 
 | 属性        |  默认值 |  类型  | 含义                               |
 | ----------  | ------ |------  |---------------------------------- |
+| name        |(根据位置改变)| String |单元格的名字| 
 | border      | false  | Boolean |是否有边框，true:有边框。false：无边框| 
 | cellHeight  | 30     | Number  |单元格高度                          |
 | cellWidth   | 100    | Number  |单元格宽度                          |

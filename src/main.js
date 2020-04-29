@@ -165,7 +165,6 @@ class DaoDaoExcel extends Event {
             }
         }
         this.table.on('mousedown',(event) => {
-            console.log(event.target.parent)
             //将工具条的状态改变得和cell的状态一致
             this.toolBar.setConfig(event.target.parent.data)
             if(event.event.button != 0){
@@ -386,14 +385,12 @@ class DaoDaoExcel extends Event {
             case 67:
                 //ctrl+c
                 if(event.ctrlKey){
-                    console.log('你按了复制哦')
                     this.setCopyCell()
                 }
                 break;    
             case 86:
                 //ctrl+v
                 if(event.ctrlKey){
-                    console.log('你按了粘贴哦')
                     this.pastCopyCell()
                 }
                 break;        
@@ -444,7 +441,6 @@ class DaoDaoExcel extends Event {
 
             this.copyCells.push(obj)
         }
-        console.log(this.copyCells)
     }
     pastCopyCell(){
         if(this.copyCells.length == 0){
@@ -1069,7 +1065,6 @@ class DaoDaoExcel extends Event {
                 this.cells[x].splice(index+1,0,insert)
                 this.table.add(insert)
             }
-            console.log(this.table)
             //更新所有cells的xy
             for(let x = 0;x<this.cells.length;x++){
                 for(let y=0;y<this.cells[x].length;y++){
@@ -1462,8 +1457,6 @@ class DaoDaoExcel extends Event {
                 yend:yend
             }
         })
-
-        console.log(this.activeCell)
     
         //其余的selectCells全部隐藏不显示，被merge
         this.selectCells.forEach(cell => {
@@ -1705,7 +1698,6 @@ class DaoDaoExcel extends Event {
                     if(data[0] instanceof Array){
                         //判断data最大的x,y如果大于现在的，那就添加几行几列
                         let arr = data.flat()
-                        console.log(arr)
                         let maxX = Math.max(...arr.map(item => item.x))
                         let maxY = Math.max(...arr.map(item => item.y))
                         if(maxX > this.tableHeaderCell.length){
@@ -1755,7 +1747,6 @@ class DaoDaoExcel extends Event {
      */
     dispose(){
         this.canvas.dispose()
-        console.log(this.canvas)
         const parent = document.getElementById(this.currentObj.id) 
         parent.innerHTML = ""
         this.canvas = null
