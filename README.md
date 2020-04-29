@@ -183,16 +183,40 @@
    #### 6. excel.cells[x][y].clearFormat()
         清除单元格格式，不清除数据          
 
-   #### 5. excel.setSpanNum(number)
+   #### 7. excel.setSpanNum(number)
         修改excel的列数   
         
-   #### 6. excel.setRowNum(number)
+   #### 8. excel.setRowNum(number)
         修改excel的行数     
 
-   #### 7. 获取某个单元格数据
+   #### 9. 获取某个单元格数据
          这个功能我没有写。。大家可以用  excel.cells 的data (hhh,我是懒鬼，反正没人用，那我就怎么开心怎么来啦)    
 
-   #### 8. excel.dispose()
+   #### 10. 添加右键菜单
+        excel.contextMenu.addButton(text,func)
+        例：添加清除内容按钮
+```js
+        const clearInputBtn = excel.contextMenu.addButton('清除内容',() => {
+            this.selectCells.forEach(cell => {
+                cell.clear()
+            })
+        })
+```        
+   #### 11. 添加工具菜单
+       excel.toolBar.addButton(html,tooltip,func)      
+       例：
+```js
+        const sayHello = excel.toolBar.addButton(
+            '<span class="say-hello"></span>',
+            '说你好',
+             (e)=>{
+                alert('你好')
+             }
+        )
+```        
+
+
+   #### 10. excel.dispose()
         移除自身。当不再需要使用该实例时，调用该方法以释放内存。
 
 ### 事件
