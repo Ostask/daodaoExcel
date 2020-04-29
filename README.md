@@ -38,9 +38,9 @@
 | text        | ""     | String  |单元格的文字                       |
 | textAlign   |center  | String  |单元格的文字对齐方式（center,left,right）|
 | textFill    |#000000 | String  |单元格文字的颜色                    |
-| x           |(根据位置改变)| Number  |单元格所在的横向的坐标               |
+| x           |(根据位置改变)| Number  |单元格所在的横向的坐标 ,坐标从零开始              |
 | xPlace      |(根据位置改变)| Number  |单元格左上角的像素坐标          |
-| y           |(根据位置改变)| Number  |单元格所在的纵向的坐标               |
+| y           |(根据位置改变)| Number  |单元格所在的纵向的坐标 ，坐标从零开始              |
 | yPlace      |(根据位置改变)| Number  |单元格左上角的像素坐标          |
 | ltIcon      |"none"  | String  |单元格左上角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
 | lbIcon      |"none"  | String  |单元格左下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
@@ -191,8 +191,8 @@
    #### 7. 获取某个单元格数据
          这个功能我没有写。。大家可以用  excel.cells 的data (hhh,我是懒鬼，反正没人用，那我就怎么开心怎么来啦)    
 
-   #### 8. 注销实例方法
-        计划中，还没做
+   #### 8. excel.dispose()
+        移除自身。当不再需要使用该实例时，调用该方法以释放内存。
 
 ### 事件
   
