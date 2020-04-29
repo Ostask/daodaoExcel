@@ -296,127 +296,130 @@ class DaoDaoExcel extends Event {
         }
         return list
     }
+    keydownMethod(event){
+        const keyCode = event.keyCode || event.which
+        //获取到activeCell的下标
+        if(!this.activeCell){
+            return false
+        }
+        let x = this.activeCell.data.x
+        let y = this.activeCell.data.y
+        switch(keyCode){
+            case 38:
+                preventDefault(event)
+                //上
+                //如果y = 0,就阻止，否则 y - 1
+                if(y > 0){
+                    y -= 1
+                    this.edit.hideEdit()
+
+                    this.activeCell = this.cells[x][y]
+                    this.cancelSelectCell()
+                    this.selectCells = [this.activeCell]
+                    this.selectedCell.change(this.selectCells,{
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight
+                    })
+                }
+                break;
+            case 40:
+                //下
+                preventDefault(event)
+                if(y < this.currentObj.row - 1){
+                    y += 1
+                    this.edit.hideEdit()
+
+                    this.activeCell = this.cells[x][y]
+                    this.cancelSelectCell()
+                    this.selectCells = [this.activeCell]
+                    this.selectedCell.change(this.selectCells,{
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight
+                    })
+                }
+                break;    
+            case 37:
+                //左
+                preventDefault(event)
+                if(x > 0){
+                    x -= 1
+                    this.edit.hideEdit()
+
+                    this.activeCell = this.cells[x][y]
+                    this.cancelSelectCell()
+                    this.selectCells = [this.activeCell]
+                    this.selectedCell.change(this.selectCells,{
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight
+                    })
+                }
+                break;  
+            case 39:
+                //右
+                preventDefault(event)
+                if(x < this.currentObj.span - 1){
+                    x += 1
+                    this.edit.hideEdit()
+
+                    this.activeCell = this.cells[x][y]
+                    this.cancelSelectCell()
+                    this.selectCells = [this.activeCell]
+                    this.selectedCell.change(this.selectCells,{
+                        cellWidth:this.currentObj.cellWidth,
+                        cellHeight:this.currentObj.cellHeight
+                    })
+                }
+                break;  
+            case 13:
+                //回车
+                this.edit.hideEdit()
+                break;     
+            case 8:
+            case 46:    
+                //删除
+                if(!this.edit.editFlag){
+                    this.selectCells.forEach(cell => {
+                        cell.clear()
+                    })
+                }   
+                break;    
+            case 67:
+                //ctrl+c
+                if(event.ctrlKey){
+                    console.log('你按了复制哦')
+                    this.setCopyCell()
+                }
+                break;    
+            case 86:
+                //ctrl+v
+                if(event.ctrlKey){
+                    console.log('你按了粘贴哦')
+                    this.pastCopyCell()
+                }
+                break;        
+        }
+    }
+    removeMethods(event){
+        if(event.target != this.edit.editEle){
+            this.edit.hideEdit()
+        }
+
+        if(this.handleTableMouseMove){
+            this.table.off('mousemove',this.handleTableMouseMove)
+        }
+        if(this.handleHeaderMouseMove && this.canvas){
+            this.canvas.off('mousemove',this.handleHeaderMouseMove)
+        }
+        if(this.handleIndexMouseMove && this.canvas){
+            this.canvas.off('mousemove',this.handleIndexMouseMove)
+        }
+    }
     initEvents(){
         //取消绑定事件
-        document.addEventListener('mouseup',(e) => {
-            if(e.target != this.edit.editEle){
-                this.edit.hideEdit()
-            }
-
-            if(this.handleTableMouseMove){
-                this.table.off('mousemove',this.handleTableMouseMove)
-            }
-            if(this.handleHeaderMouseMove){
-                this.canvas.off('mousemove',this.handleHeaderMouseMove)
-            }
-            if(this.handleIndexMouseMove){
-                this.canvas.off('mousemove',this.handleIndexMouseMove)
-            }
-        })
+        this.removeMethods = this.removeMethods.bind(this)
+        document.addEventListener('mouseup',this.removeMethods)
         //上下左右键更改一下选中和激活的单元格
-        document.addEventListener('keydown',(event) => {
-            const keyCode = event.keyCode || event.which
-            //获取到activeCell的下标
-            if(!this.activeCell){
-                return false
-            }
-            let x = this.activeCell.data.x
-            let y = this.activeCell.data.y
-            switch(keyCode){
-                case 38:
-                    preventDefault(event)
-                    //上
-                    //如果y = 0,就阻止，否则 y - 1
-                    if(y > 0){
-                        y -= 1
-                        this.edit.hideEdit()
-
-                        this.activeCell = this.cells[x][y]
-                        this.cancelSelectCell()
-                        this.selectCells = [this.activeCell]
-                        this.selectedCell.change(this.selectCells,{
-                            cellWidth:this.currentObj.cellWidth,
-                            cellHeight:this.currentObj.cellHeight
-                        })
-                    }
-                    break;
-                case 40:
-                    //下
-                    preventDefault(event)
-                    if(y < this.currentObj.row - 1){
-                        y += 1
-                        this.edit.hideEdit()
-
-                        this.activeCell = this.cells[x][y]
-                        this.cancelSelectCell()
-                        this.selectCells = [this.activeCell]
-                        this.selectedCell.change(this.selectCells,{
-                            cellWidth:this.currentObj.cellWidth,
-                            cellHeight:this.currentObj.cellHeight
-                        })
-                    }
-                    break;    
-                case 37:
-                    //左
-                    preventDefault(event)
-                    if(x > 0){
-                        x -= 1
-                        this.edit.hideEdit()
-
-                        this.activeCell = this.cells[x][y]
-                        this.cancelSelectCell()
-                        this.selectCells = [this.activeCell]
-                        this.selectedCell.change(this.selectCells,{
-                            cellWidth:this.currentObj.cellWidth,
-                            cellHeight:this.currentObj.cellHeight
-                        })
-                    }
-                    break;  
-                case 39:
-                    //右
-                    preventDefault(event)
-                    if(x < this.currentObj.span - 1){
-                        x += 1
-                        this.edit.hideEdit()
-
-                        this.activeCell = this.cells[x][y]
-                        this.cancelSelectCell()
-                        this.selectCells = [this.activeCell]
-                        this.selectedCell.change(this.selectCells,{
-                            cellWidth:this.currentObj.cellWidth,
-                            cellHeight:this.currentObj.cellHeight
-                        })
-                    }
-                    break;  
-                case 13:
-                    //回车
-                    this.edit.hideEdit()
-                    break;     
-                case 8:
-                case 46:    
-                    //删除
-                    if(!this.edit.editFlag){
-                        this.selectCells.forEach(cell => {
-                            cell.clear()
-                        })
-                    }   
-                    break;    
-                case 67:
-                    //ctrl+c
-                    if(event.ctrlKey){
-                        console.log('你按了复制哦')
-                        this.setCopyCell()
-                    }
-                    break;    
-                case 86:
-                    //ctrl+v
-                    if(event.ctrlKey){
-                        console.log('你按了粘贴哦')
-                        this.pastCopyCell()
-                    }
-                    break;        
-            }
-        })
+        document.addEventListener('keydown',this.keydownMethod)
     }
     setCopyCell(){
         //初始化选中的蓝色框框
@@ -1305,9 +1308,11 @@ class DaoDaoExcel extends Event {
             //如果没有就重新设置一下selectCells以及activeCell
             this.contextMenu.showMenu(event.offsetX,event.offsetY)
         })
-        document.addEventListener('click',()=>{
-            this.contextMenu.hideMenu()
-        })
+        this.hideMenu = this.hideMenu.bind(this)
+        document.addEventListener('click',this.hideMenu)
+    }
+    hideMenu(){
+        this.contextMenu.hideMenu()
     }
     //重新绘制cell
     refreshCell(){
@@ -1743,6 +1748,40 @@ class DaoDaoExcel extends Event {
         }else{
             return false
         }
+    }
+    /****
+     * 注销对象
+     * 
+     */
+    dispose(){
+        this.canvas.dispose()
+        console.log(this.canvas)
+        const parent = document.getElementById(this.currentObj.id) 
+        parent.innerHTML = ""
+        this.canvas = null
+        this.scroll.dispose()
+        document.removeEventListener('click',this.hideMenu)
+        document.removeEventListener('keydown',this.keydownMethod)
+        document.removeEventListener('mouseup',this.removeMethods)
+        this.currentObj = null
+        this.table = null
+        this.cells = null
+        this.activeCell = null
+        this.selectCells = null
+        this.copyCells = null
+        this.selectedCell = null
+        this.copyedCell = null
+        this.tableHeader = null
+        this.tableHeaderCell = null
+        this.tableIndex = null
+        this.tableIndexCell = null
+        this.selectAllCell = null
+        this.edit = null
+        this.contextMenu = null
+        this.changeWidthLine = null
+        this.uploadFile = null
+        this.toolBar = null
+        this.textConfig = null
     }
 }
 

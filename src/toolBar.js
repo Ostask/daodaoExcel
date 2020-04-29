@@ -400,10 +400,7 @@ class ToolBar extends Event{
         document.getElementById(id2).addEventListener('click',(event) => {
             stopPropagation(event)
             document.getElementById(id).style.display = 'block'
-        })
-
-        parent.addEventListener('click',() => {
-            document.getElementById(id).style.display = 'none'
+            parent.addEventListener('click',hide)
         })
         
         document.getElementById(id).addEventListener('click',(e) => {
@@ -414,6 +411,11 @@ class ToolBar extends Event{
             })
             this.textFillButton.querySelector(".color-line").style.backgroundColor = color
         })
+
+        function hide(){
+            document.getElementById(id).style.display = 'none'
+            parent.removeEventListener('click',hide)
+        }
     }
     initFill(){
         const id = generateUUID()
@@ -493,10 +495,7 @@ class ToolBar extends Event{
         document.getElementById(id2).addEventListener('click',(event) => {
             stopPropagation(event)
             document.getElementById(id).style.display = 'block'
-        })
-
-        parent.addEventListener('click',() => {
-            document.getElementById(id).style.display = 'none'
+            parent.addEventListener('click',hide)
         })
         
         document.getElementById(id).addEventListener('click',(e) => {
@@ -507,6 +506,10 @@ class ToolBar extends Event{
             })
             this.fillButton.querySelector(".color-line").style.backgroundColor = color
         })
+        function hide(){
+            document.getElementById(id).style.display = 'none'
+            parent.removeEventListener('click',hide)
+        }
     }
     initBorder(){
         const id = generateUUID()

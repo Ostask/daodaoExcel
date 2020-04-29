@@ -27,16 +27,21 @@ class Scroll extends Event{
         this.init(config.parent)
     }
     init(parent){
-        document.addEventListener('mouseup',()=>{
-            if(this.mouseMoveY){
-                document.removeEventListener('mousemove',this.mouseMoveY)
-            }
-            if(this.mouseMoveX){
-                document.removeEventListener('mousemove',this.mouseMoveX)
-            }
-        })
+       this.initMethod = this.initMethod.bind(this) 
+       document.addEventListener('mouseup',this.initMethod)
        this.addScrollY(parent)
        this.addScrollX(parent)
+    }
+    initMethod(){
+        if(this.mouseMoveY){
+            document.removeEventListener('mousemove',this.mouseMoveY)
+        }
+        if(this.mouseMoveX){
+            document.removeEventListener('mousemove',this.mouseMoveX)
+        }
+    }
+    dispose(){
+        document.removeEventListener('mouseup',this.initMethod)
     }
     scrollY(moveY){
         //将进度换算成进度条的移动

@@ -63,22 +63,25 @@ class TableHeaderCell extends zrender.Group{
             this.isDrag = true
             this.mousemove = this.mousemove.bind(this)
             document.addEventListener('mousemove',this.mousemove)
+            this.mouseup = this.mouseup.bind(this)
+            document.addEventListener('mouseup',this.mouseup)
         })
-        document.addEventListener('mouseup',(event) => {
-            if(this.isDrag){
-                this.data.width = event.offsetX - this.data.xPlace - this.parent.position[0]
-                let offsetX = event.offsetX
-                if(this.data.width < 10){
-                    this.data.width = 10
-                    offsetX = this.data.xPlace + 10
-                }else{
-                    offsetX = event.offsetX
-                }
-                this.emit('changeSize',{width:this.data.width,offsetX:offsetX})
+    }
+    mouseup(event){
+        if(this.isDrag){
+            this.data.width = event.offsetX - this.data.xPlace - this.parent.position[0]
+            let offsetX = event.offsetX
+            if(this.data.width < 10){
+                this.data.width = 10
+                offsetX = this.data.xPlace + 10
+            }else{
+                offsetX = event.offsetX
             }
-            this.isDrag = false
-            document.removeEventListener('mousemove',this.mousemove)
-        })
+            this.emit('changeSize',{width:this.data.width,offsetX:offsetX})
+        }
+        this.isDrag = false
+        document.removeEventListener('mousemove',this.mousemove)
+        document.removeEventListener('mouseup',this.mouseup)
     }
     mousemove(event){
         let width = event.offsetX - this.data.xPlace - this.parent.position[0]
