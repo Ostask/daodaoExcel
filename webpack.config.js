@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-    mode:"development",
+    mode:"production",
     entry:["./src/main"],
     output:{
         libraryTarget: 'umd', //类库加载方式

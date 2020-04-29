@@ -416,6 +416,7 @@ class DaoDaoExcel extends Event {
         this.removeMethods = this.removeMethods.bind(this)
         document.addEventListener('mouseup',this.removeMethods)
         //上下左右键更改一下选中和激活的单元格
+        this.keydownMethod = this.keydownMethod.bind(this)
         document.addEventListener('keydown',this.keydownMethod)
     }
     setCopyCell(){
