@@ -1,6 +1,9 @@
 # daodaoExcel
     基于canvas的和js开发的类excel表格，支持用户自定义添加工具栏以及右键菜单
 
+    项目演示：
+[https://ostask.github.io/daodaoExcel/](https://ostask.github.io/daodaoExcel/)
+
 ## 基本使用
 
 ### 初始化
