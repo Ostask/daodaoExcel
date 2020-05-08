@@ -66,6 +66,8 @@ class DaoDaoExcel extends Event {
             'border':false,
             'textAlign':'center'
         }
+        //当前是否正在编辑
+        this.isActive = false
         this.init()
     }
     init(){
@@ -78,7 +80,7 @@ class DaoDaoExcel extends Event {
         }
         const canvasWrapper = document.createElement('div')
         canvasWrapper.id = generateUUID()
-        canvasWrapper.style.width = parent.clientWidth + 'px'
+        canvasWrapper.style.width = '100%'
         canvasWrapper.style.height = (parent.clientHeight - 30) + 'px'
         parent.appendChild(canvasWrapper)
        //新建canvas
@@ -171,6 +173,7 @@ class DaoDaoExcel extends Event {
                 //如果点击的不是鼠标左键
                 return false
             }
+            this.isActive = true
             this.emit("clickCell",{data:event.target.parent.data})
             //隐藏输入框
             this.edit.hideEdit()
@@ -197,6 +200,7 @@ class DaoDaoExcel extends Event {
         })
         //鼠标双击进入编辑模式
         this.table.on("dblclick",(event) => {
+            this.isActive = false
             //计算可编辑div的位置
             let x = event.target.parent.data.x
             let y = event.target.parent.data.y
@@ -305,6 +309,9 @@ class DaoDaoExcel extends Event {
         let y = this.activeCell.data.y
         switch(keyCode){
             case 38:
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 //上
                 //如果y = 0,就阻止，否则 y - 1
@@ -323,6 +330,9 @@ class DaoDaoExcel extends Event {
                 break;
             case 40:
                 //下
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(y < this.currentObj.row - 1){
                     y += 1
@@ -339,6 +349,9 @@ class DaoDaoExcel extends Event {
                 break;    
             case 37:
                 //左
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(x > 0){
                     x -= 1
@@ -355,6 +368,9 @@ class DaoDaoExcel extends Event {
                 break;  
             case 39:
                 //右
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(x < this.currentObj.span - 1){
                     x += 1
@@ -410,6 +426,16 @@ class DaoDaoExcel extends Event {
         if(this.handleIndexMouseMove && this.canvas){
             this.canvas.off('mousemove',this.handleIndexMouseMove)
         }
+
+        this.isActive = false
+
+        let list = event.composedPath()
+        for(let i = 0;i<list.length;i++){
+            if(list[i].id == this.currentObj.id){
+                this.isActive = true
+                break;
+            }
+        }
     }
     initEvents(){
         //取消绑定事件
@@ -418,6 +444,7 @@ class DaoDaoExcel extends Event {
         //上下左右键更改一下选中和激活的单元格
         this.keydownMethod = this.keydownMethod.bind(this)
         document.addEventListener('keydown',this.keydownMethod)
+        const parent = document.getElementById(this.currentObj.id) 
     }
     setCopyCell(){
         //初始化选中的蓝色框框

@@ -50,7 +50,7 @@
 | lbIcon      |"none"  | String  |单元格左下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
 | rtIcon      |"none"  | String  |单元格右上角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
 | rbIcon      |"none"  | String  |单元格右下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
-
+| imgUrl      |"none"  | String  |单元格的图片地址|
 
 ##### 2.其它属性
     参考zrender的Elements属性
