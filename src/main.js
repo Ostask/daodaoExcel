@@ -436,6 +436,12 @@ class DaoDaoExcel extends Event {
                 break;
             }
         }
+        for(let i = 0;i<list.length;i++){
+            if(list[i].id == 'daodao_excel_edit_div'){
+                this.isActive = false
+                break;
+            }
+        }
     }
     initEvents(){
         //取消绑定事件
@@ -1775,9 +1781,12 @@ class DaoDaoExcel extends Event {
      */
     dispose(){
         this.canvas.dispose()
-        const parent = document.getElementById(this.currentObj.id) 
-        parent.innerHTML = ""
         this.canvas = null
+        const parent = document.getElementById(this.currentObj.id) 
+        console.log(parent)
+        if(parent){
+            parent.innerHTML = ""
+        }
         this.scroll.dispose()
         document.removeEventListener('click',this.hideMenu)
         document.removeEventListener('keydown',this.keydownMethod)
