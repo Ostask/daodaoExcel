@@ -1515,7 +1515,7 @@ class DaoDaoExcel extends Event {
 
         for(let x = xstart;x<=xend;x++){
             for(let y=ystart;y<=yend;y++){
-                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 && this.cells[x][y].data.span > 1){
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row + this.cells[x][y].data.span > 2){
                     let x0 = this.cells[x][y].data.mergeConfig.xstart
                     let y0 = this.cells[x][y].data.mergeConfig.ystart
                     let x1 = this.cells[x][y].data.mergeConfig.xend
