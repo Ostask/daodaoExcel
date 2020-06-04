@@ -222,6 +222,11 @@
    #### 10. excel.dispose()
         移除自身。当不再需要使用该实例时，调用该方法以释放内存。
 
+   #### 11. excel.setSelect(xstart,ystart,xend?,yend?)
+        设置选中的单元格
+   #### 12. excel.clearTableDatasAndFormat()
+        初始化表格     
+
 ### 事件
   
    #### 1.单元格点击事件
@@ -230,6 +235,27 @@
    例：
 ```js
     excel.on("clickCell",(data) =>{
+        console.log(data)
+    })
+
+```   
+   #### 2.上下左右切换单元格事件
+   moveCell事件
+
+   例：
+```js
+    excel.on("moveCell",(data) =>{
+        console.log(data)
+    })
+
+```   
+
+   #### 3.单元格数据改变事件
+   changeCell事件
+
+   例：
+```js
+    excel.on("changeCell",(data) =>{
         console.log(data)
     })
 

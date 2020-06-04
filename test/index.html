@@ -11,7 +11,8 @@
     <button id="btn2">改变列数</button>
     <button id="btn3">获取数据</button>
     <button id="btn4">填充数据</button>
-
+    <button id="btn5">选择单元格</button>
+    <button id="btn6">初始化表格</button>
 
 
     <div id="daodao" style="width:1000px;height:600px;"></div>
@@ -38,8 +39,20 @@
             ]
             exc.setTableDatas(data,true)
         })
+        document.getElementById('btn5').addEventListener('click',() => {
+            exc.setSelect(5,4,6,8)
+        })
+        document.getElementById('btn6').addEventListener('click',() => {
+            exc.clearTableDatasAndFormat()
+        })
         exc.on("clickCell",(data) =>{
             console.log("点击了哦",data)
+        })
+        exc.on("moveCell",(data) =>{
+            console.log("移动了哦",data)
+        })
+        exc.on("changeCell",(data) => {
+            console.log("单元格改变了哦",data)
         })
     </script>
 </body>

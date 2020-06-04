@@ -142,8 +142,19 @@ class DaoDaoExcel extends Event {
         this.selectCells.forEach(cell => {
             cell.selectCell()
         })
-        this.selectedCell.change(this.selectCells)
-        this.activeCell.unSelectCell()
+         //初始化选中的蓝色框框
+         if(this.selectedCell){
+            //如果有选择框了就更新位置
+            this.selectedCell.change(this.selectCells)
+        }else{
+            //如果没有选择框就创建一个
+            this.selectedCell = new SelectCell(this.selectCells)
+            this.canvas.add(this.selectedCell)
+        }
+        this.activeCell = this.selectCells[0]
+        if(this.activeCell){
+            this.activeCell.unSelectCell()
+        }
         this.changeHeaderAndIndexState(this.selectCells)
     }
     initCells(){
@@ -163,6 +174,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:"",
                 },...this.textConfig})
+                this.cells[x][y].addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.table.add(this.cells[x][y])
             }
         }
@@ -215,6 +229,19 @@ class DaoDaoExcel extends Event {
             //改变编辑框的状态
             this.edit.setPosition(width,height,positionX,positionY,data)
         })
+    }
+    setSelect(xstart,ystart,xend,yend){
+        if(!xend){
+            xend = xstart
+        }
+        if(!yend){
+            yend = ystart
+        }
+        this.cancelSelectCell()
+        
+        this.selectCells = this.countSelect(xstart,xend,ystart,yend)
+        
+        this.updateSelectState()
     }
     handleTableMouseMove(event){
         //计算当前拖动到的单元格的下标
@@ -326,6 +353,7 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;
             case 40:
@@ -345,6 +373,7 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;    
             case 37:
@@ -364,6 +393,7 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;  
             case 39:
@@ -383,6 +413,7 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;  
             case 13:
@@ -1039,6 +1070,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:""
                 },...this.textConfig})
+                insertArr[y].addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.table.add(insertArr[y])
             }
             this.cells.splice(index+1,0,insertArr)
@@ -1096,6 +1130,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:""
                 },...this.textConfig})
+                insert.addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.cells[x].splice(index+1,0,insert)
                 this.table.add(insert)
             }
@@ -1642,6 +1679,9 @@ class DaoDaoExcel extends Event {
                         merge:false,
                         text:""
                     },...this.textConfig})
+                    insertArr[y].addEvent('change',(event)=>{
+                        this.emit("changeCell",event)
+                    })
                     this.table.add(insertArr[y])
                 }
                 this.cells.splice(index,0,insertArr)
@@ -1687,6 +1727,9 @@ class DaoDaoExcel extends Event {
                         merge:false,
                         text:""
                     },...this.textConfig})
+                    insert.addEvent('change',(event)=>{
+                        this.emit("changeCell",event)
+                    })
                     this.cells[x].splice(index,0,insert)
                     this.table.add(insert)
                 }
@@ -1706,6 +1749,25 @@ class DaoDaoExcel extends Event {
             data.push(arr)
         }
         return data
+    }
+    clearTableDatasAndFormat(){
+        this.tableHeaderCell.forEach(item => {
+            item.setData({
+                width:this.currentObj.cellWidth,
+            })
+        })
+        this.tableIndexCell.forEach(item => {
+            item.setData({
+                height:this.currentObj.cellHeight,
+            })
+        })
+        this.cells.forEach(list => {
+            list.forEach(cell => {
+                cell.clear()
+                cell.clearFormat()
+            })
+        })
+        this.refreshCell()
     }
     //批量填充全部数据
     /*
