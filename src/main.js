@@ -1761,12 +1761,34 @@ class DaoDaoExcel extends Event {
                 height:this.currentObj.cellHeight,
             })
         })
-        this.cells.forEach(list => {
-            list.forEach(cell => {
-                cell.clear()
-                cell.clearFormat()
-            })
-        })
+        for(let x = 0;x<this.cells.length;x++){
+            for(let y=0;y<this.cells[x].length;y++){
+                this.cells[x][y].clear()
+                this.cells[x][y].clearFormat()
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row + this.cells[x][y].data.span > 2){
+                    let x0 = this.cells[x][y].data.mergeConfig.xstart
+                    let y0 = this.cells[x][y].data.mergeConfig.ystart
+                    let x1 = this.cells[x][y].data.mergeConfig.xend
+                    let y1 = this.cells[x][y].data.mergeConfig.yend
+                    for(let i = x0;i<=x1;i++){
+                        for(let j=y0;j<=y1;j++){
+                            this.cells[i][j].setData({
+                                xPlace:this.tableHeaderCell[i].data.xPlace,
+                                yPlace:this.tableIndexCell[j].data.yPlace,
+                                cellWidth:this.tableHeaderCell[i].data.width,
+                                cellHeight:this.tableIndexCell[j].data.height,
+                                merge:false,
+                                row:1,
+                                span:1,
+                                mergeConfig:null
+                            })
+                            this.cells[i][j].show()
+                            this.selectCells.push(this.cells[i][j])
+                        }
+                    }
+                }
+            }
+        }
         this.refreshCell()
     }
     //批量填充全部数据
