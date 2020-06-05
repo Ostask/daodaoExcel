@@ -66,6 +66,8 @@ class DaoDaoExcel extends Event {
             'border':false,
             'textAlign':'center'
         }
+        //当前是否正在编辑
+        this.isActive = false
         this.init()
     }
     init(){
@@ -78,7 +80,7 @@ class DaoDaoExcel extends Event {
         }
         const canvasWrapper = document.createElement('div')
         canvasWrapper.id = generateUUID()
-        canvasWrapper.style.width = parent.clientWidth + 'px'
+        canvasWrapper.style.width = '100%'
         canvasWrapper.style.height = (parent.clientHeight - 30) + 'px'
         parent.appendChild(canvasWrapper)
        //新建canvas
@@ -140,8 +142,19 @@ class DaoDaoExcel extends Event {
         this.selectCells.forEach(cell => {
             cell.selectCell()
         })
-        this.selectedCell.change(this.selectCells)
-        this.activeCell.unSelectCell()
+         //初始化选中的蓝色框框
+         if(this.selectedCell){
+            //如果有选择框了就更新位置
+            this.selectedCell.change(this.selectCells)
+        }else{
+            //如果没有选择框就创建一个
+            this.selectedCell = new SelectCell(this.selectCells)
+            this.canvas.add(this.selectedCell)
+        }
+        this.activeCell = this.selectCells[0]
+        if(this.activeCell){
+            this.activeCell.unSelectCell()
+        }
         this.changeHeaderAndIndexState(this.selectCells)
     }
     initCells(){
@@ -161,6 +174,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:"",
                 },...this.textConfig})
+                this.cells[x][y].addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.table.add(this.cells[x][y])
             }
         }
@@ -171,6 +187,7 @@ class DaoDaoExcel extends Event {
                 //如果点击的不是鼠标左键
                 return false
             }
+            this.isActive = true
             this.emit("clickCell",{data:event.target.parent.data})
             //隐藏输入框
             this.edit.hideEdit()
@@ -197,6 +214,7 @@ class DaoDaoExcel extends Event {
         })
         //鼠标双击进入编辑模式
         this.table.on("dblclick",(event) => {
+            this.isActive = false
             //计算可编辑div的位置
             let x = event.target.parent.data.x
             let y = event.target.parent.data.y
@@ -211,6 +229,19 @@ class DaoDaoExcel extends Event {
             //改变编辑框的状态
             this.edit.setPosition(width,height,positionX,positionY,data)
         })
+    }
+    setSelect(xstart,ystart,xend,yend){
+        if(!xend){
+            xend = xstart
+        }
+        if(!yend){
+            yend = ystart
+        }
+        this.cancelSelectCell()
+        
+        this.selectCells = this.countSelect(xstart,xend,ystart,yend)
+        
+        this.updateSelectState()
     }
     handleTableMouseMove(event){
         //计算当前拖动到的单元格的下标
@@ -305,6 +336,9 @@ class DaoDaoExcel extends Event {
         let y = this.activeCell.data.y
         switch(keyCode){
             case 38:
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 //上
                 //如果y = 0,就阻止，否则 y - 1
@@ -319,10 +353,14 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;
             case 40:
                 //下
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(y < this.currentObj.row - 1){
                     y += 1
@@ -335,10 +373,14 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;    
             case 37:
                 //左
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(x > 0){
                     x -= 1
@@ -351,10 +393,14 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;  
             case 39:
                 //右
+                if(!this.isActive){
+                    return false
+                }
                 preventDefault(event)
                 if(x < this.currentObj.span - 1){
                     x += 1
@@ -367,6 +413,7 @@ class DaoDaoExcel extends Event {
                         cellWidth:this.currentObj.cellWidth,
                         cellHeight:this.currentObj.cellHeight
                     })
+                    this.emit("moveCell",{data:this.cells[x][y].data})
                 }
                 break;  
             case 13:
@@ -410,6 +457,22 @@ class DaoDaoExcel extends Event {
         if(this.handleIndexMouseMove && this.canvas){
             this.canvas.off('mousemove',this.handleIndexMouseMove)
         }
+
+        this.isActive = false
+
+        let list = event.composedPath()
+        for(let i = 0;i<list.length;i++){
+            if(list[i].id == this.currentObj.id){
+                this.isActive = true
+                break;
+            }
+        }
+        for(let i = 0;i<list.length;i++){
+            if(list[i].id == 'daodao_excel_edit_div'){
+                this.isActive = false
+                break;
+            }
+        }
     }
     initEvents(){
         //取消绑定事件
@@ -418,6 +481,7 @@ class DaoDaoExcel extends Event {
         //上下左右键更改一下选中和激活的单元格
         this.keydownMethod = this.keydownMethod.bind(this)
         document.addEventListener('keydown',this.keydownMethod)
+        const parent = document.getElementById(this.currentObj.id) 
     }
     setCopyCell(){
         //初始化选中的蓝色框框
@@ -1006,6 +1070,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:""
                 },...this.textConfig})
+                insertArr[y].addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.table.add(insertArr[y])
             }
             this.cells.splice(index+1,0,insertArr)
@@ -1063,6 +1130,9 @@ class DaoDaoExcel extends Event {
                     merge:false,
                     text:""
                 },...this.textConfig})
+                insert.addEvent('change',(event)=>{
+                    this.emit("changeCell",event)
+                })
                 this.cells[x].splice(index+1,0,insert)
                 this.table.add(insert)
             }
@@ -1482,7 +1552,7 @@ class DaoDaoExcel extends Event {
 
         for(let x = xstart;x<=xend;x++){
             for(let y=ystart;y<=yend;y++){
-                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 && this.cells[x][y].data.span > 1){
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row + this.cells[x][y].data.span > 2){
                     let x0 = this.cells[x][y].data.mergeConfig.xstart
                     let y0 = this.cells[x][y].data.mergeConfig.ystart
                     let x1 = this.cells[x][y].data.mergeConfig.xend
@@ -1609,6 +1679,9 @@ class DaoDaoExcel extends Event {
                         merge:false,
                         text:""
                     },...this.textConfig})
+                    insertArr[y].addEvent('change',(event)=>{
+                        this.emit("changeCell",event)
+                    })
                     this.table.add(insertArr[y])
                 }
                 this.cells.splice(index,0,insertArr)
@@ -1654,6 +1727,9 @@ class DaoDaoExcel extends Event {
                         merge:false,
                         text:""
                     },...this.textConfig})
+                    insert.addEvent('change',(event)=>{
+                        this.emit("changeCell",event)
+                    })
                     this.cells[x].splice(index,0,insert)
                     this.table.add(insert)
                 }
@@ -1673,6 +1749,47 @@ class DaoDaoExcel extends Event {
             data.push(arr)
         }
         return data
+    }
+    clearTableDatasAndFormat(){
+        this.tableHeaderCell.forEach(item => {
+            item.setData({
+                width:this.currentObj.cellWidth,
+            })
+        })
+        this.tableIndexCell.forEach(item => {
+            item.setData({
+                height:this.currentObj.cellHeight,
+            })
+        })
+        for(let x = 0;x<this.cells.length;x++){
+            for(let y=0;y<this.cells[x].length;y++){
+                this.cells[x][y].clear()
+                this.cells[x][y].clearFormat()
+                if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row + this.cells[x][y].data.span > 2){
+                    let x0 = this.cells[x][y].data.mergeConfig.xstart
+                    let y0 = this.cells[x][y].data.mergeConfig.ystart
+                    let x1 = this.cells[x][y].data.mergeConfig.xend
+                    let y1 = this.cells[x][y].data.mergeConfig.yend
+                    for(let i = x0;i<=x1;i++){
+                        for(let j=y0;j<=y1;j++){
+                            this.cells[i][j].setData({
+                                xPlace:this.tableHeaderCell[i].data.xPlace,
+                                yPlace:this.tableIndexCell[j].data.yPlace,
+                                cellWidth:this.tableHeaderCell[i].data.width,
+                                cellHeight:this.tableIndexCell[j].data.height,
+                                merge:false,
+                                row:1,
+                                span:1,
+                                mergeConfig:null
+                            })
+                            this.cells[i][j].show()
+                            this.selectCells.push(this.cells[i][j])
+                        }
+                    }
+                }
+            }
+        }
+        this.refreshCell()
     }
     //批量填充全部数据
     /*
@@ -1748,9 +1865,12 @@ class DaoDaoExcel extends Event {
      */
     dispose(){
         this.canvas.dispose()
-        const parent = document.getElementById(this.currentObj.id) 
-        parent.innerHTML = ""
         this.canvas = null
+        const parent = document.getElementById(this.currentObj.id) 
+        console.log(parent)
+        if(parent){
+            parent.innerHTML = ""
+        }
         this.scroll.dispose()
         document.removeEventListener('click',this.hideMenu)
         document.removeEventListener('keydown',this.keydownMethod)

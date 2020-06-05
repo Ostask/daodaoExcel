@@ -45,6 +45,7 @@ class Cell extends zrender.Group{
             yPlace:yPlace,
             name:generateCode(data.x)+(data.y+1)
         })
+        this.handlers = {}
         this.type = 'cell'
         this.img = null
         this.ltIcon = null
@@ -60,6 +61,34 @@ class Cell extends zrender.Group{
         this.cell.type = 'cellborder'
         this.add(this.cell)
     }
+    addEvent(type,handler){
+        if(typeof this.handlers[type] === "undefined"){
+            this.handlers[type] = []
+        }
+        this.handlers[type].push(handler)
+    }
+    emit(type,event){
+        if(!event.target){
+            event.target = this
+        }
+        if(this.handlers[type] instanceof Array){
+            const handlers = this.handlers[type]
+            handlers.forEach((handler)=>{
+                handler(event)
+            })
+        }
+    }
+    removeEvent(type,handler){
+        if(this.handlers[type] instanceof Array){
+            const handlers = this.handlers[type]
+            for(var i = 0,len = handlers.length; i < len; i++){
+                if(handlers[i] === handler){
+                    break;
+                }
+            }
+            handlers.splice(i,1)
+        }
+    }
     //设置选中单元格样式
     selectCell(){
         let color = 'rgba(1,136,251,0.1)'
@@ -73,42 +102,63 @@ class Cell extends zrender.Group{
         this.cell.attr({style:{fill:this.data.fill}})
     }
     //设置单元格文字
-    setText(text){
+    setText(text,flag){
         this.cell.attr({style:{text:text}})
         this.data.text = text
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置字体
-    setFontFamily(font){
+    setFontFamily(font,flag){
         this.cell.attr({style:{fontFamily:font}})
         this.data.fontFamily = font
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置字体大小
-    setFontSize(size){
+    setFontSize(size,flag){
         this.cell.attr({style:{fontSize:size}})
         this.data.fontSize = size
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置文字粗细
-    setFontWeight(data){
+    setFontWeight(data,flag){
         this.cell.attr({style:{fontWeight:data}})
         this.data.fontWeight = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置文字倾斜
-    setFontItalic(data){
+    setFontItalic(data,flag){
         this.cell.attr({style:{fontStyle:data}})
         this.data.fontStyle = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置字体颜色
-    setTextFill(data){
+    setTextFill(data,flag){
         this.cell.attr({style:{textFill:data}})
         this.data.textFill = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置背景颜色
-    setFill(data){
+    setFill(data,flag){
         this.cell.attr({style:{fill:data}})
         this.data.fill = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置边框
-    setBorder(data){
+    setBorder(data,flag){
         if(data == 'true'){
             this.cell.attr({style:{stroke: '#000',lineWidth:2}})
             this.cell.attr({z:2})
@@ -117,9 +167,12 @@ class Cell extends zrender.Group{
             this.cell.attr({z:1})
         }
         this.data.border = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置对齐方式
-    setTextAlign(data){
+    setTextAlign(data,flag){
         if(data == 'left'){
             this.cell.attr({style:{
                 textAlign:'left',
@@ -140,6 +193,9 @@ class Cell extends zrender.Group{
             }})
         }
         this.data.textAlign = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置单元格data
     setData(data){
@@ -152,10 +208,10 @@ class Cell extends zrender.Group{
         }})
         //更改图片
         if(this.data.imgUrl){
-            this.addImage(this.data.imgUrl)
+            this.addImage(this.data.imgUrl,true)
         }else{
             if(this.img){
-                this.removeImage()
+                this.removeImage(true)
             }else{
                 
             }
@@ -168,34 +224,36 @@ class Cell extends zrender.Group{
         }
         this.attr('position',[this.data.xPlace,this.data.yPlace])
         //更改文字
-        this.setText(this.data.text)
+        this.setText(this.data.text,true)
         //更改字体
-        this.setFontFamily(this.data.fontFamily)
+        this.setFontFamily(this.data.fontFamily,true)
         //更改字体大小
-        this.setFontSize(this.data.fontSize)
+        this.setFontSize(this.data.fontSize,true)
         //更改文字粗细
-        this.setFontWeight(this.data.fontWeight)
+        this.setFontWeight(this.data.fontWeight,true)
         //更改文字倾斜
-        this.setFontItalic(this.data.fontStyle)
+        this.setFontItalic(this.data.fontStyle,true)
         //更改字体颜色
-        this.setTextFill(this.data.textFill)
+        this.setTextFill(this.data.textFill,true)
         //更改背景颜色
-        this.setFill(this.data.fill)
+        this.setFill(this.data.fill,true)
         //设置边框
-        this.setBorder(this.data.border)
+        this.setBorder(this.data.border,true)
         //设置对齐方式
-        this.setTextAlign(this.data.textAlign)
+        this.setTextAlign(this.data.textAlign,true)
         //设置左上角标
-        this.setLTIcon(this.data.ltIcon)
+        this.setLTIcon(this.data.ltIcon,true)
         //设置右上角标
-        this.setRTIcon(this.data.rtIcon)
+        this.setRTIcon(this.data.rtIcon,true)
         //设置左下角标
-        this.setLBIcon(this.data.lbIcon)
+        this.setLBIcon(this.data.lbIcon,true)
         //设置右下角标
-        this.setRBIcon(this.data.rbIcon)
+        this.setRBIcon(this.data.rbIcon,true)
+
+        this.emit('change',{data:this.data})
     }
     //设置左上角标
-    setLTIcon(data){
+    setLTIcon(data,flag){
         if(data){
             if(data == "none"){
                 if(this.ltIcon){
@@ -225,9 +283,12 @@ class Cell extends zrender.Group{
             }
         }
         this.data.ltIcon = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置左下角标
-    setLBIcon(data){
+    setLBIcon(data,flag){
         if(data){
             if(data == "none"){
                 if(this.lbIcon){
@@ -257,9 +318,12 @@ class Cell extends zrender.Group{
             }
         }
         this.data.lbIcon = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置右上角标
-    setRTIcon(data){
+    setRTIcon(data,flag){
         if(data){
             if(data == "none"){
                 if(this.rtIcon){
@@ -289,9 +353,12 @@ class Cell extends zrender.Group{
             }
         }
         this.data.rtIcon = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //设置右下角标
-    setRBIcon(data){
+    setRBIcon(data,flag){
         if(data){
             if(data == "none"){
                 if(this.rbIcon){
@@ -321,9 +388,12 @@ class Cell extends zrender.Group{
             }
         }
         this.data.rbIcon = data
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
     //添加图片
-    addImage(url){
+    addImage(url,flag){
         this.data.imgUrl = url
         if(this.img){
             this.remove(this.img)
@@ -341,12 +411,19 @@ class Cell extends zrender.Group{
             z:2
         })
         this.add(this.img)
+        if(!flag){
+            this.emit('change',{data:this.data})
+        }
     }
-    removeImage(){
+    removeImage(flag){
+        console.log(this.img)
         if(this.img){
             this.remove(this.img)
             this.img = null
             this.data.imgUrl = ""
+        }
+        if(!flag){
+            this.emit('change',{data:this.data})
         }
     }
     clear(){
@@ -374,6 +451,7 @@ class Cell extends zrender.Group{
         }
         this.data = data
         this.setData(data)
+        this.emit('change',{data:this.data})
     }
     clearFormat(){
         let data = {
@@ -387,6 +465,7 @@ class Cell extends zrender.Group{
             textAlign:'center',
         }
         this.setData(data)
+        this.emit('change',{data:this.data})
     }
 }
 

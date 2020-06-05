@@ -1,6 +1,9 @@
 # daodaoExcel
     基于canvas的和js开发的类excel表格，支持用户自定义添加工具栏以及右键菜单
 
+    项目演示：
+[https://ostask.github.io/daodaoExcel/](https://ostask.github.io/daodaoExcel/)
+
 ## 基本使用
 
 ### 初始化
@@ -47,7 +50,7 @@
 | lbIcon      |"none"  | String  |单元格左下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
 | rtIcon      |"none"  | String  |单元格右上角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
 | rbIcon      |"none"  | String  |单元格右下角的图标 ，注：有五个默认的图标 "upArrow","downArrow","leftArrow","rightArrow","filter",暂时不支持别的图标，有需求联系作者         |
-
+| imgUrl      |"none"  | String  |单元格的图片地址|
 
 ##### 2.其它属性
     参考zrender的Elements属性
@@ -183,17 +186,46 @@
    #### 6. excel.cells[x][y].clearFormat()
         清除单元格格式，不清除数据          
 
-   #### 5. excel.setSpanNum(number)
+   #### 7. excel.setSpanNum(number)
         修改excel的列数   
         
-   #### 6. excel.setRowNum(number)
+   #### 8. excel.setRowNum(number)
         修改excel的行数     
 
-   #### 7. 获取某个单元格数据
+   #### 9. 获取某个单元格数据
          这个功能我没有写。。大家可以用  excel.cells 的data (hhh,我是懒鬼，反正没人用，那我就怎么开心怎么来啦)    
 
-   #### 8. excel.dispose()
+   #### 10. 添加右键菜单
+        excel.contextMenu.addButton(text,func)
+        例：添加清除内容按钮
+```js
+        const clearInputBtn = excel.contextMenu.addButton('清除内容',() => {
+            this.selectCells.forEach(cell => {
+                cell.clear()
+            })
+        })
+```        
+   #### 11. 添加工具菜单
+       excel.toolBar.addButton(html,tooltip,func)      
+       例：
+```js
+        const sayHello = excel.toolBar.addButton(
+            '<span class="say-hello"></span>',
+            '说你好',
+             (e)=>{
+                alert('你好')
+             }
+        )
+```        
+
+
+   #### 10. excel.dispose()
         移除自身。当不再需要使用该实例时，调用该方法以释放内存。
+
+   #### 11. excel.setSelect(xstart,ystart,xend?,yend?)
+        设置选中的单元格
+   #### 12. excel.clearTableDatasAndFormat()
+        初始化表格     
 
 ### 事件
   
@@ -203,6 +235,27 @@
    例：
 ```js
     excel.on("clickCell",(data) =>{
+        console.log(data)
+    })
+
+```   
+   #### 2.上下左右切换单元格事件
+   moveCell事件
+
+   例：
+```js
+    excel.on("moveCell",(data) =>{
+        console.log(data)
+    })
+
+```   
+
+   #### 3.单元格数据改变事件
+   changeCell事件
+
+   例：
+```js
+    excel.on("changeCell",(data) =>{
         console.log(data)
     })
 

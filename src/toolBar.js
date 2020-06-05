@@ -268,8 +268,8 @@ class ToolBar extends Event{
         const id2 = generateUUID()
         const html = `
             <div class="toolbar-icon" id="${id1}">
-                <svg style="margin-top: 2px;vertical-align: top" t="1586918593118" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4607" width="12" height="12"><path d="M792.864 922.112l103.584-2.176L572.576 110.24h-89.184L161.696 919.936H264l66.944-167.936h394.112l67.808 170.112zM369.216 656L528 257.632 686.784 656h-317.568z" p-id="4608"></path></svg>
-                <div class="color-line" style="width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-6px;border:1px solid #aaa"></div>
+                <svg style="margin-top: 0px;vertical-align: top" t="1586918593118" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4607" width="14" height="16"><path d="M792.864 922.112l103.584-2.176L572.576 110.24h-89.184L161.696 919.936H264l66.944-167.936h394.112l67.808 170.112zM369.216 656L528 257.632 686.784 656h-317.568z" p-id="4608"></path></svg>
+                <div class="color-line" style="box-sizing:content-box;width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-2px;border:1px solid #aaa"></div>
             </div>
             <div class="tooltip__down">
                 文字颜色
@@ -424,7 +424,7 @@ class ToolBar extends Event{
         const html = `
             <div class="toolbar-icon" id="${id1}">
                 <svg t="1586930965024" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5660" width="16" height="16"><path d="M896 384c-46.72-46.72-160.64-25.6-219.52-10.24L448.64 152.96l-21.76 21.76L313.6 65.28 223.36 152.96 336.64 262.4 66.56 524.16v2.56L448.64 896l359.68-349.44L960 693.12S960 448 896 384zM194.56 524.16l255.36-247.68 254.72 247.68H194.56z" p-id="5661"></path></svg>
-                <div class="color-line" style="width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-6px;border:1px solid #aaa;"></div>
+                <div class="color-line" style="box-sizing:content-box;width:12px;height:2px;background-color:#000;line-height:0px;margin-top:-4px;border:1px solid #aaa;"></div>
             </div>
             <div class="tooltip__down">
                 背景颜色
