@@ -1827,11 +1827,26 @@ class DaoDaoExcel extends Event {
                         //二维
                         for(let i = 0;i<data.length;i++){
                             for(let j = 0;j<data[i].length;j++){
+                                if(data[i][j].cellWidth){
+                                    if(this.tableHeaderCell[data[i][j].x].data.width < data[i][j].cellWidth){
+                                        this.tableHeaderCell[data[i][j].x].setData({
+                                            width:data[i][j].cellWidth
+                                        })
+                                    }
+                                }
+                                if(data[i][j].cellHeight){
+                                    if(this.tableIndexCell[data[i][j].y].data.height < data[i][j].cellHeight){
+                                        this.tableIndexCell[data[i][j].y].setData({
+                                            height:data[i][j].cellHeight
+                                        })
+                                    }
+                                }
                                 this.cells[data[i][j].x][data[i][j].y].setData({
                                     ...this.textConfig,...data[i][j]
                                 })
                             }
                         }
+                        this.refreshCell()
                     }else{
                         //判断data最大的x,y如果大于现在的，那就添加几行几列
                         let maxX = Math.max(data.map(item => item.x))
@@ -1844,10 +1859,25 @@ class DaoDaoExcel extends Event {
                         }
                         //一维
                         for(let i = 0;i<data.length;i++){
+                            if(data[i].cellWidth){
+                                if(this.tableHeaderCell[data[i].x].data.width < data[i].cellWidth){
+                                    this.tableHeaderCell[data[i].x].setData({
+                                        width:data[i].cellWidth
+                                    })
+                                }
+                            }
+                            if(data[i].cellHeight){
+                                if(this.tableIndexCell[data[i].y].data.height < data[i].cellHeight){
+                                    this.tableIndexCell[data[i].y].setData({
+                                        height:data[i].cellHeight
+                                    })
+                                }
+                            }
                             this.cells[data[i].x][data[i].y].setData({
                                 ...this.textConfig,...data[i]
                             })
                         }
+                        this.refreshCell()
                     }
                 }else{
                     return false
