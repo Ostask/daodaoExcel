@@ -1828,17 +1828,51 @@ class DaoDaoExcel extends Event {
                         for(let i = 0;i<data.length;i++){
                             for(let j = 0;j<data[i].length;j++){
                                 if(data[i][j].cellWidth){
-                                    if(this.tableHeaderCell[data[i][j].x].data.width < data[i][j].cellWidth){
-                                        this.tableHeaderCell[data[i][j].x].setData({
-                                            width:data[i][j].cellWidth
-                                        })
+                                    if(data[i][j].merge && data[i][j].row > 0 && data[i][j].span > 0){
+                                        //计算正确的宽度，合并过的单元格宽度需要用总宽度减去被合并的宽度
+                                        let xstart = data[i][j].mergeConfig.xstart
+                                        let xend = data[i][j].mergeConfig.xend
+                                        let cellWidth = data[i][j].cellWidth
+                                        for(let x = 0;x<data.length;x++){
+                                            if(data[x][j].x >= xstart && data[x][j].x <= xend && data[x][j].merge && data[x][j].span == 0){
+                                                cellWidth -= data[x][j].cellWidth
+                                            }
+                                        }
+                                        if(this.tableHeaderCell[data[i][j].x].data.width < cellWidth){
+                                            this.tableHeaderCell[data[i][j].x].setData({
+                                                width:cellWidth
+                                            })
+                                        }
+                                    }else{
+                                        if(this.tableHeaderCell[data[i][j].x].data.width < data[i][j].cellWidth){
+                                            this.tableHeaderCell[data[i][j].x].setData({
+                                                width:data[i][j].cellWidth
+                                            })
+                                        }
                                     }
                                 }
                                 if(data[i][j].cellHeight){
-                                    if(this.tableIndexCell[data[i][j].y].data.height < data[i][j].cellHeight){
-                                        this.tableIndexCell[data[i][j].y].setData({
-                                            height:data[i][j].cellHeight
-                                        })
+                                    if(data[i][j].merge && data[i][j].row > 0 && data[i][j].span > 0){
+                                        //计算正确的高度
+                                        let ystart = data[i][j].mergeConfig.ystart
+                                        let yend = data[i][j].mergeConfig.yend
+                                        let cellHeight = data[i][j].cellHeight
+                                        for(let y = 0;y<data[i].length;y++){
+                                            if(data[i][y].y >= ystart && data[i][y].y <= yend && data[i][y].merge && data[i][y].row == 0){
+                                                cellHeight -= data[i][y].cellHeight
+                                            }
+                                        }
+                                        if(this.tableIndexCell[data[i][j].y].data.height < cellHeight){
+                                            this.tableIndexCell[data[i][j].y].setData({
+                                                height:cellHeight
+                                            })
+                                        }
+                                    }else{
+                                        if(this.tableIndexCell[data[i][j].y].data.height < data[i][j].cellHeight){
+                                            this.tableIndexCell[data[i][j].y].setData({
+                                                height:data[i][j].cellHeight
+                                            })
+                                        }
                                     }
                                 }
                                 this.cells[data[i][j].x][data[i][j].y].setData({
@@ -1860,17 +1894,51 @@ class DaoDaoExcel extends Event {
                         //一维
                         for(let i = 0;i<data.length;i++){
                             if(data[i].cellWidth){
-                                if(this.tableHeaderCell[data[i].x].data.width < data[i].cellWidth){
-                                    this.tableHeaderCell[data[i].x].setData({
-                                        width:data[i].cellWidth
-                                    })
+                                if(data[i].merge && data[i].row > 0 && data[i].span > 0){
+                                    //计算正确的宽度，合并过的单元格宽度需要用总宽度减去被合并的宽度
+                                    let xstart = data[i].mergeConfig.xstart
+                                    let xend = data[i].mergeConfig.xend
+                                    let cellWidth = data[i].cellWidth
+                                    for(let x = 0;x<data.length;x++){
+                                        if(data[x].x >= xstart && data[x].x <= xend && data[x].merge && data[x].span == 0){
+                                            cellWidth -= data[x].cellWidth
+                                        }
+                                    }
+                                    if(this.tableHeaderCell[data[i].x].data.width < cellWidth){
+                                        this.tableHeaderCell[data[i].x].setData({
+                                            width:cellWidth
+                                        })
+                                    }
+                                }else{
+                                    if(this.tableHeaderCell[data[i].x].data.width < data[i].cellWidth){
+                                        this.tableHeaderCell[data[i].x].setData({
+                                            width:data[i].cellWidth
+                                        })
+                                    }
                                 }
                             }
                             if(data[i].cellHeight){
-                                if(this.tableIndexCell[data[i].y].data.height < data[i].cellHeight){
-                                    this.tableIndexCell[data[i].y].setData({
-                                        height:data[i].cellHeight
-                                    })
+                                if(data[i].merge && data[i].row > 0 && data[i].span > 0){
+                                    //计算正确的高度
+                                    let ystart = data[i].mergeConfig.ystart
+                                    let yend = data[i].mergeConfig.yend
+                                    let cellHeight = data[i].cellHeight
+                                    for(let y = 0;y<data.length;y++){
+                                        if(data[y].y >= ystart && data[y].y <= yend && data[y].merge && data[y].row == 0){
+                                            cellHeight -= data[y].cellHeight
+                                        }
+                                    }
+                                    if(this.tableIndexCell[data[i].y].data.height < cellHeight){
+                                        this.tableIndexCell[data[i].y].setData({
+                                            height:cellHeight
+                                        })
+                                    }
+                                }else{
+                                    if(this.tableIndexCell[data[i].y].data.height < data[i].cellHeight){
+                                        this.tableIndexCell[data[i].y].setData({
+                                            height:data[i].cellHeight
+                                        })
+                                    }
                                 }
                             }
                             this.cells[data[i].x][data[i].y].setData({
