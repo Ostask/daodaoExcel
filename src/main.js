@@ -1081,7 +1081,7 @@ class DaoDaoExcel extends Event {
                 for(let y=0;y<this.cells[x].length;y++){
                     this.cells[x][y].setData({x:x,y:y})
                     //如果这个单元格是合并的单元格
-                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 0 &&this.cells[x][y].data.span > 0){
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.xstart && index < this.cells[x][y].data.mergeConfig.xend){
                             this.cells[x][y].data.mergeConfig.xend += 1
@@ -1141,7 +1141,7 @@ class DaoDaoExcel extends Event {
                 for(let y=0;y<this.cells[x].length;y++){
                     this.cells[x][y].setData({x:x,y:y})
                     //如果这个单元格是合并的单元格
-                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 1 &&this.cells[x][y].data.span > 1){
+                    if(this.cells[x][y].data.merge == true && this.cells[x][y].data.row > 0 &&this.cells[x][y].data.span > 0){
                         //如果index在merge的单元格之中
                         if(index >= this.cells[x][y].data.mergeConfig.ystart && index < this.cells[x][y].data.mergeConfig.yend){
                             this.cells[x][y].data.mergeConfig.yend += 1
