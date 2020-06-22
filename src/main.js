@@ -1389,7 +1389,7 @@ class DaoDaoExcel extends Event {
         //重绘tableCell
         this.refreshTableCell()
         //刷新选择框
-        if(this.selectCells.length > 0){
+        if(this.selectCells.length > 0 && this.selectedCell){
             this.selectedCell.change(this.selectCells)
             this.selectCells.forEach(cell => {
                 cell.selectCell()
