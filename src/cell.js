@@ -159,14 +159,15 @@ class Cell extends zrender.Group{
     }
     //设置边框
     setBorder(data,flag){
-        if(data == 'true'){
+        if(data===true || data == 'true'){
             this.cell.attr({style:{stroke: '#000',lineWidth:2}})
             this.cell.attr({z:2})
+            this.data.border = true
         }else{
             this.cell.attr({style:{stroke: '#aaa',lineWidth:1}})
             this.cell.attr({z:1})
+            this.data.border = false
         }
-        this.data.border = data
         if(!flag){
             this.emit('change',{data:this.data})
         }
