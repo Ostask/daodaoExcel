@@ -26,7 +26,7 @@ class Edit extends Event{
     //改变编辑框的位置和大小
     setPosition(width,height,positionX,positionY,data){
         this.editEle.style.width = `${width - 2}px`
-        this.editEle.style.height = `${height - 2}px`
+        this.editEle.style.minHeight = `${height - 2}px`
         this.editEle.style.top = `${positionY}px`
         this.editEle.style.left = `${positionX}px`
         this.editEle.textContent = data
