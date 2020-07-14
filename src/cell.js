@@ -22,6 +22,9 @@ class Cell extends zrender.Group{
                 height:data.cellHeight * 2
             },
             style:{
+                truncate:{
+                    outerWidth:data.cellWidth
+                },
                 stroke: '#aaa',
                 fill: 'white',
                 lineWidth:'1',
@@ -207,6 +210,13 @@ class Cell extends zrender.Group{
             width:this.data.cellWidth * 2,
             height:this.data.cellHeight * 2
         }})
+        this.cell.attr({
+            style:{
+                truncate:{
+                    outerWidth:data.cellWidth
+                }
+            }
+        })
         //更改图片
         if(this.data.imgUrl){
             this.addImage(this.data.imgUrl,true)
