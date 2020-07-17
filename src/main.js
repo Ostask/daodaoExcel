@@ -516,8 +516,31 @@ class DaoDaoExcel extends Event {
         let copyMax = Math.max(...this.copyCells.map(item => item.x))
         let copyMin = Math.min(...this.copyCells.map(item => item.x))
         let copyYMin =  Math.min(...this.copyCells.map(item => item.y))
+        let copyYMax =  Math.max(...this.copyCells.map(item => item.y))
         let copySpan = copyMax - copyMin + 1
         let copyRow = this.copyCells.length / copySpan
+
+        if(this.copyCells.length == 1 && this.copyCells[0].mergeConfig){
+            copyMax = this.copyCells[0].mergeConfig.xend
+            copyMin = this.copyCells[0].mergeConfig.xstart
+            copyYMin =  this.copyCells[0].mergeConfig.ystart
+            copyYMax =  this.copyCells[0].mergeConfig.yend
+            copySpan = copyMax - copyMin + 1
+            copyRow = copyYMax - copyYMin + 1
+
+            this.copyCells = []
+            for(let i = copyMin;i<=copyMax;i++){
+                for(let j = copyYMin;j<=copyYMax;j++){
+                    let obj = zrender.util.clone(this.cells[i][j].data)
+                    delete obj.cellHeight
+                    delete obj.cellWidth
+                    delete obj.xPlace
+                    delete obj.yPlace
+        
+                    this.copyCells.push(obj)
+                }
+            }
+        }
 
         let tempSelect = []
         let selectMax = Math.max(...this.selectCells.map(item => item.data.x))
