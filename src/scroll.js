@@ -206,6 +206,9 @@ class Scroll extends Event{
             if(this.scrollHeight){
                 this.parent.removeChild(this.scrollHeight)
                 this.scrollHeight = null
+                this.emit('scrollY',{
+                    pageMove:0
+                })
             }
         }
         //判断是否要横向滚动条
@@ -223,6 +226,9 @@ class Scroll extends Event{
             if(this.scrollWidth){
                 this.parent.removeChild(this.scrollWidth)
                 this.scrollWidth = null
+                this.emit('scrollX',{
+                    pageMove:0
+                })
             }
         }
     }
