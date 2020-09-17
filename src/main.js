@@ -969,10 +969,10 @@ class DaoDaoExcel extends Event {
             this.edit.hideEdit()
             let positionX = this.table.position[0]
             let moveY = e.pageMove
-            if(moveY >= 0){
+            if(moveY > 0){
                 moveY = 0
             }
-            else if(moveY < -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)){
+            if(moveY < -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)){
                 moveY = -(this.scroll.config.fullHeight - this.scroll.config.wrapHeight + scrollWidth)
             }
             this.table.attr('position',[positionX, moveY])
@@ -990,12 +990,10 @@ class DaoDaoExcel extends Event {
             this.edit.hideEdit()
             let positionY = this.table.position[1]
             let moveX = e.pageMove
-            if(moveX >= 0){
+            if(moveX > 0){
                 moveX = 0
-                console.log(1)
             }
-            else if(moveX < -(this.scroll.config.fullWidth - this.scroll.config.wrapWidth + scrollWidth)){
-                console.log(2)
+            if(moveX < -(this.scroll.config.fullWidth - this.scroll.config.wrapWidth + scrollWidth)){
                 moveX = -(this.scroll.config.fullWidth - this.scroll.config.wrapWidth + scrollWidth)
             }
             this.table.attr('position',[moveX, positionY])

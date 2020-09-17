@@ -198,13 +198,6 @@ class Scroll extends Event{
                 //设置纵向滚动条的style
                 this.scrollHeight.style.height = `${this.config.wrapHeight}px`
                 this.scrollHeightBtn.style.height = `${this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight}px`
-                let  positionY = this.config.wrapHeight - (this.config.wrapHeight / this.config.fullHeight * this.config.wrapHeight)
-                if(positionY < parseInt(this.scrollHeightBtn.style.top)){
-                    this.scrollHeightBtn.style.top = positionY + 'px'
-                }
-                this.emit('scrollY',{
-                    pageMove:-100000
-                })
             }else{
                 this.addScrollY()
             }
@@ -213,9 +206,6 @@ class Scroll extends Event{
             if(this.scrollHeight){
                 this.parent.removeChild(this.scrollHeight)
                 this.scrollHeight = null
-                this.emit('scrollY',{
-                    pageMove:0
-                })
             }
         }
         //判断是否要横向滚动条
@@ -225,14 +215,6 @@ class Scroll extends Event{
                 //设置纵向滚动条的style
                 this.scrollWidth.style.width = `${this.config.wrapWidth - this.config.scrollWidth}px`
                 this.scrollWidthBtn.style.width = `${this.config.wrapWidth / this.config.fullWidth * (this.config.wrapWidth - this.config.scrollWidth)}px`
-                let positionX = this.config.wrapWidth - (this.config.wrapWidth / this.config.fullWidth * this.config.wrapWidth)
-                console.log(positionX)
-                if(positionX < parseInt(this.scrollWidthBtn.style.left)){
-                    this.scrollWidthBtn.style.left = positionX + 'px'
-                }
-                this.emit('scrollX',{
-                    pageMove:-10000
-                })
             }else{
                 this.addScrollX()
             }
@@ -241,9 +223,6 @@ class Scroll extends Event{
             if(this.scrollWidth){
                 this.parent.removeChild(this.scrollWidth)
                 this.scrollWidth = null
-                this.emit('scrollX',{
-                    pageMove:0
-                })
             }
         }
     }
